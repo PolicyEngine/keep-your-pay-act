@@ -68,6 +68,7 @@ export default function AggregateImpact({ triggered }: Props) {
   const [selectedYear, setSelectedYear] = useState(2026);
   const { data, isLoading, error } = useAggregateImpact(triggered, selectedYear);
   const [activeSection, setActiveSection] = useState<'fiscal' | 'distributional' | 'winners' | 'poverty'>('fiscal');
+  const [distMode, setDistMode] = useState<'relative' | 'absolute'>('relative');
 
   if (!triggered) return null;
 
@@ -256,55 +257,86 @@ export default function AggregateImpact({ triggered }: Props) {
       )}
 
       {/* ===== DISTRIBUTIONAL IMPACT ===== */}
-      {activeSection === 'distributional' && (
-        <div className="space-y-6">
-          <p className="text-gray-700">
-            Impact on household net income by income decile. Decile 1 is the lowest income, decile 10 is the highest.
-          </p>
+      {activeSection === 'distributional' && (() => {
+        const isRelative = distMode === 'relative';
+        const rawValues = isRelative
+          ? Object.values(data.decile.relative).map(v => v * 100)
+          : Object.values(data.decile.average);
+        const maxAbs = Math.max(...rawValues.map(Math.abs));
+        const niceStep = (() => {
+          const rough = maxAbs / 3;
+          const mag = Math.pow(10, Math.floor(Math.log10(rough)));
+          const residual = rough / mag;
+          if (residual <= 1) return mag;
+          if (residual <= 2) return 2 * mag;
+          if (residual <= 5) return 5 * mag;
+          return 10 * mag;
+        })();
+        const niceMax = Math.ceil(maxAbs / niceStep) * niceStep;
+        const symmetricDomain = [-niceMax, niceMax];
+        const niceTicks = Array.from(
+          { length: Math.round(2 * niceMax / niceStep) + 1 },
+          (_, i) => -niceMax + i * niceStep,
+        );
+        const chartData = isRelative
+          ? Object.entries(data.decile.relative).map(([k, v]) => ({ decile: k, value: v * 100 }))
+          : Object.entries(data.decile.average).map(([k, v]) => ({ decile: k, value: v }));
 
-          {/* Relative impact by decile */}
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">Relative impact by income decile</h3>
-            <div className="bg-white border rounded-lg p-6">
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={Object.entries(data.decile.relative).map(([k, v]) => ({ decile: k, value: v * 100 }))} margin={CHART_MARGIN}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                  <XAxis dataKey="decile" tick={TICK_STYLE} stroke="#A0AEC0" label={{ value: 'Income Decile', position: 'insideBottom', offset: -15, style: { ...TICK_STYLE, fill: '#718096' } }} />
-                  <YAxis tickFormatter={(v: number) => `${v >= 0 ? '+' : ''}${v.toFixed(1)}%`} tick={TICK_STYLE} stroke="#A0AEC0" width={60} />
-                  <Tooltip content={<CustomTooltip formatter={(v) => `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`} />} />
-                  <ReferenceLine y={0} stroke="#A0AEC0" strokeWidth={1} />
-                  <Bar dataKey="value" name="Relative Impact (% of income)" radius={[2, 2, 0, 0]}>
-                    {Object.values(data.decile.relative).map((v, i) => (
-                      <Cell key={i} fill={v >= 0 ? COLORS.positive : COLORS.negative} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <h3 className="text-lg font-semibold text-gray-800">Impact by income decile</h3>
+              <div className="flex gap-1">
+                {(['relative', 'absolute'] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    onClick={() => setDistMode(mode)}
+                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                      distMode === mode
+                        ? 'bg-primary-500 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {mode === 'relative' ? 'Relative' : 'Absolute'}
+                  </button>
+                ))}
+              </div>
             </div>
+            <p className="text-gray-700">
+              {isRelative
+                ? 'Change in household net income as a percentage of baseline income, by decile.'
+                : 'Average change in household net income in dollars, by decile.'}
+            </p>
+            <ResponsiveContainer width="100%" height={400}>
+              <BarChart data={chartData} margin={CHART_MARGIN}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                <XAxis dataKey="decile" tick={TICK_STYLE} stroke="#A0AEC0" label={{ value: 'Income decile', position: 'insideBottom', offset: -15, style: { ...TICK_STYLE, fill: '#718096' } }} />
+                <YAxis
+                  domain={symmetricDomain}
+                  ticks={niceTicks}
+                  tickFormatter={isRelative
+                    ? (v: number) => `${v >= 0 ? '+' : ''}${v.toFixed(1)}%`
+                    : formatCurrencyWithSign}
+                  tick={TICK_STYLE}
+                  stroke="#A0AEC0"
+                  width={isRelative ? 60 : 80}
+                  allowDecimals={false}
+                />
+                <Tooltip content={<CustomTooltip formatter={isRelative
+                  ? (v) => `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`
+                  : (v) => formatCurrencyWithSign(v)} />}
+                />
+                <ReferenceLine y={0} stroke="#A0AEC0" strokeWidth={1} />
+                <Bar dataKey="value" name={isRelative ? 'Relative impact (% of income)' : 'Average impact'} radius={[2, 2, 0, 0]}>
+                  {rawValues.map((v, i) => (
+                    <Cell key={i} fill={v >= 0 ? COLORS.positive : COLORS.negative} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
-
-          {/* Average absolute impact by decile */}
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">Average impact by income decile</h3>
-            <div className="bg-white border rounded-lg p-6">
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={Object.entries(data.decile.average).map(([k, v]) => ({ decile: k, value: v }))} margin={CHART_MARGIN}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                  <XAxis dataKey="decile" tick={TICK_STYLE} stroke="#A0AEC0" label={{ value: 'Income Decile', position: 'insideBottom', offset: -15, style: { ...TICK_STYLE, fill: '#718096' } }} />
-                  <YAxis tickFormatter={formatCurrencyWithSign} tick={TICK_STYLE} stroke="#A0AEC0" width={80} />
-                  <Tooltip content={<CustomTooltip formatter={(v) => formatCurrencyWithSign(v)} />} />
-                  <ReferenceLine y={0} stroke="#A0AEC0" strokeWidth={1} />
-                  <Bar dataKey="value" name="Average Impact" radius={[2, 2, 0, 0]}>
-                    {Object.values(data.decile.average).map((v, i) => (
-                      <Cell key={i} fill={v >= 0 ? COLORS.positive : COLORS.negative} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* ===== WINNERS & LOSERS ===== */}
       {activeSection === 'winners' && (() => {
@@ -322,10 +354,13 @@ export default function AggregateImpact({ triggered }: Props) {
             label: 'All',
             ...Object.fromEntries(categories.map(c => [c.key, (intra.all[c.key] * 100)])),
           },
-          ...Array.from({ length: 10 }, (_, i) => ({
-            label: `${i + 1}`,
-            ...Object.fromEntries(categories.map(c => [c.key, (intra.deciles[c.key][i] * 100)])),
-          })),
+          ...Array.from({ length: 10 }, (_, i) => {
+            const d = 10 - i;
+            return {
+              label: `${d}`,
+              ...Object.fromEntries(categories.map(c => [c.key, (intra.deciles[c.key][d - 1] * 100)])),
+            };
+          }),
         ];
 
         return (
@@ -407,57 +442,28 @@ export default function AggregateImpact({ triggered }: Props) {
         ];
 
         const chartData = povertyMetrics.map((m) => {
-          const ppChange = m.reform - m.baseline;
-          return { ...m, ppChange };
+          const pctChange = m.baseline !== 0 ? ((m.reform - m.baseline) / m.baseline) * 100 : 0;
+          return { ...m, pctChange };
         });
 
         return (
           <div className="space-y-6">
-            <p className="text-gray-700">
-              Impact on poverty rates, measured as the share of people below the poverty line.
-            </p>
-
-            {/* Metric cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {chartData.map((m, i) => {
-                const improved = m.ppChange <= 0;
-                return (
-                  <div key={i} className={`rounded-lg p-6 border ${
-                    improved ? 'bg-green-50 border-green-300' : 'bg-red-50 border-red-300'
-                  }`}>
-                    <p className="text-sm text-gray-700 mb-2">{m.label}</p>
-                    <p className={`text-3xl font-bold ${improved ? 'text-green-700' : 'text-red-700'}`}>
-                      {m.ppChange > 0 ? '+' : ''}{m.ppChange.toFixed(2)}pp
-                    </p>
-                    <div className="mt-3 pt-3 border-t border-gray-200 space-y-1">
-                      <p className="text-xs text-gray-500">
-                        Baseline: {m.baseline.toFixed(2)}% → Reform: {m.reform.toFixed(2)}%
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Bar chart: pp change */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">Change in poverty rates (pp)</h3>
-              <div className="bg-white border rounded-lg p-6">
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={chartData} margin={CHART_MARGIN}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                    <XAxis dataKey="label" tick={TICK_STYLE} stroke="#A0AEC0" />
-                    <YAxis tickFormatter={(v: number) => `${v >= 0 ? '+' : ''}${v.toFixed(2)}pp`} tick={TICK_STYLE} stroke="#A0AEC0" width={70} />
-                    <Tooltip content={<CustomTooltip formatter={(v) => `${v >= 0 ? '+' : ''}${v.toFixed(2)}pp`} />} />
-                    <ReferenceLine y={0} stroke="#A0AEC0" strokeWidth={1} />
-                    <Bar dataKey="ppChange" name="Change (pp)" radius={[2, 2, 0, 0]}>
-                      {chartData.map((m, i) => (
-                        <Cell key={i} fill={m.ppChange <= 0 ? COLORS.positive : '#EF4444'} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">Change in poverty rates (%)</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={chartData} margin={CHART_MARGIN}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                  <XAxis dataKey="label" tick={TICK_STYLE} stroke="#A0AEC0" />
+                  <YAxis tickFormatter={(v: number) => `${v >= 0 ? '+' : ''}${v.toFixed(1)}%`} tick={TICK_STYLE} stroke="#A0AEC0" width={70} allowDecimals={false} />
+                  <Tooltip content={<CustomTooltip formatter={(v) => `${v >= 0 ? '+' : ''}${v.toFixed(1)}%`} />} />
+                  <ReferenceLine y={0} stroke="#A0AEC0" strokeWidth={1} />
+                  <Bar dataKey="pctChange" name="Change (%)" radius={[2, 2, 0, 0]}>
+                    {chartData.map((m, i) => (
+                      <Cell key={i} fill={m.pctChange <= 0 ? COLORS.positive : COLORS.negative} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
         );
