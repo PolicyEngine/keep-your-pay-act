@@ -29,13 +29,19 @@ const US_STATES = [
 export default function Home() {
   const [activeTab, setActiveTab] = useState<'policy' | 'impact' | 'aggregate'>('policy');
 
+  const TAB_CONFIG = [
+    { id: 'policy' as const, label: 'Policy overview' },
+    { id: 'impact' as const, label: 'Household impact' },
+    { id: 'aggregate' as const, label: 'National impact' },
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-primary-500 text-white py-8 px-4 shadow-md">
         <div className="max-w-5xl mx-auto">
           <h1 className="text-4xl font-bold mb-2">
-            Keep Your Pay Act
+            Keep Your Pay Act Calculator
           </h1>
           <p className="text-lg opacity-90">
             Estimate the impact of Senator Booker&apos;s proposed tax reform
@@ -45,28 +51,31 @@ export default function Home() {
 
       <div className="max-w-5xl mx-auto px-4 py-8">
         {/* Tabs */}
-        <div className="flex space-x-1 mb-4">
-          {(['policy', 'impact', 'aggregate'] as const).map((tab) => (
+        <div className="flex space-x-1 mb-4" role="tablist">
+          {TAB_CONFIG.map((tab) => (
             <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
+              key={tab.id}
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              aria-controls={`tabpanel-${tab.id}`}
+              onClick={() => setActiveTab(tab.id)}
               className={`px-6 py-3 rounded-t-lg font-semibold transition-colors ${
-                activeTab === tab
+                activeTab === tab.id
                   ? 'bg-white text-primary-600 border-t-4 border-primary-500'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
-              {tab === 'policy'
-                ? 'Policy overview'
-                : tab === 'impact'
-                ? 'Household impact'
-                : 'National impact'}
+              {tab.label}
             </button>
           ))}
         </div>
 
         {/* Tab content */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div
+          role="tabpanel"
+          id={`tabpanel-${activeTab}`}
+          className="bg-white rounded-lg shadow-md p-6"
+        >
           {activeTab === 'policy' ? (
             <PolicyOverview />
           ) : activeTab === 'impact' ? (
@@ -76,7 +85,7 @@ export default function Home() {
           )}
         </div>
       </div>
-    </div>
+    </main>
   );
 }
 
@@ -135,7 +144,7 @@ function HouseholdImpactTab() {
     <div className="space-y-6">
       {/* Inline household config */}
       <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Your household</h3>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Your household</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* AGI */}
           <div>
@@ -189,6 +198,7 @@ function HouseholdImpactTab() {
                 min={18}
                 max={100}
                 placeholder="Spouse age"
+                aria-label="Spouse age"
                 className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
               />
             )}
@@ -223,6 +233,7 @@ function HouseholdImpactTab() {
                     max={26}
                     className="px-2 py-1 border border-gray-300 rounded text-sm"
                     placeholder={`Age ${i + 1}`}
+                    aria-label={`Dependent ${i + 1} age`}
                   />
                 ))}
                 </div>

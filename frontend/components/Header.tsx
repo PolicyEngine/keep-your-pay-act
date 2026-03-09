@@ -64,7 +64,7 @@ export default function Header() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '100%' }}>
         {/* Left: Logo + Desktop Nav */}
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <a href="https://policyengine.org/us" style={{ display: 'flex', alignItems: 'center', marginRight: '12px' }}>
+          <a href="https://policyengine.org/us" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', marginRight: '12px' }}>
             <img
               src="https://policyengine.org/assets/logos/policyengine/white.svg"
               alt="PolicyEngine"
@@ -90,7 +90,7 @@ export default function Header() {
                     }}
                   >
                     {item.label}
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <polyline points="6 9 12 15 18 9" />
                     </svg>
                   </button>
@@ -112,6 +112,7 @@ export default function Header() {
                         <a
                           key={sub.label}
                           href={sub.href}
+                          rel="noopener noreferrer"
                           style={{
                             display: 'block',
                             padding: '8px 16px',
@@ -128,7 +129,7 @@ export default function Header() {
                   )}
                 </div>
               ) : (
-                <a key={item.label} href={item.href} style={linkStyle}>
+                <a key={item.label} href={item.href} style={linkStyle} rel="noopener noreferrer">
                   {item.label}
                 </a>
               ),
@@ -144,7 +145,7 @@ export default function Header() {
               style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, lineHeight: 1 }}
               aria-label="Country selector"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <circle cx="12" cy="12" r="10" />
                 <line x1="2" y1="12" x2="22" y2="12" />
                 <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
@@ -168,6 +169,7 @@ export default function Header() {
                   <a
                     key={c.id}
                     href={`https://policyengine.org/${c.id}`}
+                    rel="noopener noreferrer"
                     style={{
                       display: 'block',
                       padding: '8px 16px',
@@ -193,7 +195,7 @@ export default function Header() {
             style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px' }}
             aria-label="Toggle navigation"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <line x1="3" y1="12" x2="21" y2="12" />
               <line x1="3" y1="6" x2="21" y2="6" />
               <line x1="3" y1="18" x2="21" y2="18" />
@@ -227,7 +229,7 @@ export default function Header() {
                 style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}
                 aria-label="Close menu"
               >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <line x1="18" y1="6" x2="6" y2="18" />
                   <line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
@@ -242,14 +244,14 @@ export default function Header() {
                     </span>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', paddingLeft: '12px' }}>
                       {item.items!.map((sub) => (
-                        <a key={sub.label} href={sub.href} style={{ color: '#fff', textDecoration: 'none', fontSize: '14px' }}>
+                        <a key={sub.label} href={sub.href} rel="noopener noreferrer" style={{ color: '#fff', textDecoration: 'none', fontSize: '14px' }}>
                           {sub.label}
                         </a>
                       ))}
                     </div>
                   </div>
                 ) : (
-                  <a key={item.label} href={item.href} style={{ color: '#fff', textDecoration: 'none', fontWeight: 500, fontSize: '14px', display: 'block' }}>
+                  <a key={item.label} href={item.href} rel="noopener noreferrer" style={{ color: '#fff', textDecoration: 'none', fontWeight: 500, fontSize: '14px', display: 'block' }}>
                     {item.label}
                   </a>
                 ),
