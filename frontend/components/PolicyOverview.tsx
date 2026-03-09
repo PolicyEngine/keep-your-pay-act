@@ -403,23 +403,6 @@ export default function PolicyOverview() {
             </a>
           </li>
         </ul>
-        <ul className="list-disc list-inside space-y-1 text-gray-600">
-          <li>
-            Reform modeled using{' '}
-            <a
-              href="https://policyengine.org/us/policy?reform=96180"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary-600 underline hover:text-primary-700"
-            >
-              PolicyEngine policy ID 96180
-            </a>
-          </li>
-          <li>
-            Microsimulation based on the 2024 Current Population Survey (CPS), projected to 2026
-          </li>
-          <li>Current-law parameters reflect 2026 values assuming TCJA sunset</li>
-        </ul>
       </div>
     </div>
   );
