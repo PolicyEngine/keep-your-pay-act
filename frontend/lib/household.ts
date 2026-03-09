@@ -39,11 +39,17 @@ export function buildHouseholdSituation(
     families: { "your family": { members: ["you"] } },
     marital_units: { "your marital unit": { members: ["you"] } },
     spm_units: { "your household": { members: ["you"] } },
-    tax_units: { "your tax unit": { members: ["you"] } },
+    tax_units: {
+      "your tax unit": {
+        members: ["you"],
+        adjusted_gross_income: { [yearStr]: null },
+      },
+    },
     households: {
       "your household": {
         members: ["you"],
         state_code: { [yearStr]: state_code },
+        household_net_income: { [yearStr]: null },
       },
     },
     axes: [
