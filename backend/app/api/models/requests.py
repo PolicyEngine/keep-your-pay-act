@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 
 class ReformParams(BaseModel):
-    pass  # TODO: Add reform-specific toggles once bill details are known
+    rate_increase_enabled: bool = True  # Whether to include top rate increases (35%→41%, 37%→43%)
 
 
 class HouseholdRequest(BaseModel):

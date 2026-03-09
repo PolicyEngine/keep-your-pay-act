@@ -99,6 +99,7 @@ function HouseholdImpactTab() {
   const [income, setIncome] = useState(75000);
   const [stateCode, setStateCode] = useState('CA');
   const [maxEarnings, setMaxEarnings] = useState(500000);
+  const [rateIncreaseEnabled, setRateIncreaseEnabled] = useState(true);
   const [triggered, setTriggered] = useState(false);
   const [submittedRequest, setSubmittedRequest] = useState<HouseholdRequest | null>(null);
 
@@ -132,7 +133,7 @@ function HouseholdImpactTab() {
     year: 2026,
     max_earnings: maxEarnings,
     state_code: stateCode,
-    reform_params: {},
+    reform_params: { rate_increase_enabled: rateIncreaseEnabled },
   });
 
   const handleCalculate = () => {
@@ -283,6 +284,26 @@ function HouseholdImpactTab() {
                 <option key={s.code} value={s.code}>{s.name}</option>
               ))}
             </select>
+          </div>
+
+          {/* Top rate increase toggle */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Top rate increases</label>
+            <div className="flex items-center space-x-2 py-2">
+              <input
+                type="checkbox"
+                id="rateIncrease"
+                checked={rateIncreaseEnabled}
+                onChange={(e) => setRateIncreaseEnabled(e.target.checked)}
+                className="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded"
+              />
+              <label htmlFor="rateIncrease" className="text-sm text-gray-700">
+                Include top rate increases
+              </label>
+            </div>
+            <p className="text-xs text-gray-500">
+              Raises the 35% bracket to 41% and 37% bracket to 43%
+            </p>
           </div>
         </div>
 

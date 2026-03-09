@@ -88,10 +88,11 @@ export default function PolicyOverview() {
         </h2>
         <p className="text-gray-700 mb-4">
           The Keep Your Pay Act, introduced by Senator Cory Booker (D-NJ), would
-          more than double the standard deduction, expand the Child Tax Credit, and
-          increase the Earned Income Tax Credit for childless workers.
+          more than double the standard deduction, expand the Child Tax Credit,
+          increase the Earned Income Tax Credit for childless workers, and raise
+          top income tax rates.
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
             <h3 className="font-semibold text-gray-800 mb-2">Increased standard deduction</h3>
             <p className="text-sm text-gray-600">
@@ -113,6 +114,13 @@ export default function PolicyOverview() {
               Lowers the minimum age from 25 to 19, removes the maximum age limit,
               and increases the maximum credit from $664 to $1,502 with a doubled
               phase-in rate.
+            </p>
+          </div>
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <h3 className="font-semibold text-gray-800 mb-2">Top income tax rate increases</h3>
+            <p className="text-sm text-gray-600">
+              Raises the 35% marginal tax bracket to 41% and the 37% bracket to
+              43%, increasing taxes on high-income earners.
             </p>
           </div>
         </div>
@@ -138,7 +146,7 @@ export default function PolicyOverview() {
           .
         </p>
         <p className="text-xs text-gray-500 mt-2">
-          This analysis is limited to the three provisions listed above. As more details of the proposal are made public, we may update this analysis.
+          This analysis is limited to the four provisions listed above. As more details of the proposal are made public, we may update this analysis.
         </p>
       </div>
 

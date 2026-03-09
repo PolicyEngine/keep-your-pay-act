@@ -1,13 +1,15 @@
 """
 Keep Your Pay Act reform definition.
 
-Encodes three main provisions:
+Encodes four main provisions:
 1. Standard deduction increase — raises the standard deduction to $37,500
    single / $75,000 joint (2026), indexed for inflation through 2035.
 2. AFA Child Tax Credit expansion — sets the base CTC amount to $3,600
    (2026), rising to $4,440 by 2035.
 3. EITC expansion — increases the childless-worker EITC (higher max credit,
    higher phase-in/phase-out rates, broader age eligibility).
+4. Top income tax rate increases — raises the 35% bracket to 41% and the
+   37% bracket to 43%.
 
 Uses PolicyEngine policy ID 96180.
 """
@@ -144,12 +146,29 @@ POLICY_JSON = {
     },
 }
 
+# Top income tax rate increases: 35% → 41%, 37% → 43%
+TOP_RATE_INCREASE_JSON = {
+    "gov.irs.income.bracket.rates.6": {
+        "2026-01-01.2100-12-31": 0.41,
+    },
+    "gov.irs.income.bracket.rates.7": {
+        "2026-01-01.2100-12-31": 0.43,
+    },
+}
 
-def create_reform(year: int = 2026):
+
+def create_reform(year: int = 2026, rate_increase_enabled: bool = True):
     """Create the Keep Your Pay Act reform for the given year.
 
+    Args:
+        year: Tax year (unused — reform dict covers 2026-2035).
+        rate_increase_enabled: Whether to include the top rate increases
+            (35% → 41%, 37% → 43%). Defaults to True.
+
     Returns a Reform object built from the full policy JSON via
-    Reform.from_dict. The year parameter is accepted for API
-    compatibility but the reform dict already covers 2026-2035.
+    Reform.from_dict.
     """
-    return Reform.from_dict(POLICY_JSON, country_id="us")
+    policy = POLICY_JSON.copy()
+    if rate_increase_enabled:
+        policy.update(TOP_RATE_INCREASE_JSON)
+    return Reform.from_dict(policy, country_id="us")

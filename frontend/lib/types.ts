@@ -1,5 +1,5 @@
 export interface ReformParams {
-  // Keep Your Pay Act uses a single reform variant — no toggles needed
+  rate_increase_enabled?: boolean;
 }
 
 export interface HouseholdRequest {

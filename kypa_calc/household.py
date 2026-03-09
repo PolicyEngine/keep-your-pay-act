@@ -94,7 +94,9 @@ def calculate_household_impact(params: dict) -> dict:
     from .reforms import create_reform
 
     year = params.get("year", 2026)
-    reform = create_reform(year=year)
+    reform_params = params.get("reform_params", {})
+    rate_increase_enabled = reform_params.get("rate_increase_enabled", True)
+    reform = create_reform(year=year, rate_increase_enabled=rate_increase_enabled)
 
     situation = build_household_situation(
         age_head=params["age_head"],
