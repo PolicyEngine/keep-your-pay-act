@@ -328,10 +328,6 @@ export default function PolicyOverview() {
               </tr>
             </tbody>
           </table>
-          <p className="text-xs text-gray-500 mt-2">
-            Current-law CTC is $2,200 per qualifying child under 17 (2026 baseline).
-            The baby bonus is an additional credit on top of the under-6 amount in the year of birth.
-          </p>
         </div>
       </div>
 
@@ -389,9 +385,6 @@ export default function PolicyOverview() {
               </tr>
             </tbody>
           </table>
-          <p className="text-xs text-gray-500 mt-2">
-            Current-law values are for tax year 2026 (0-child EITC parameters).
-          </p>
         </div>
       </div>
 
