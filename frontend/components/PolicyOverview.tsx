@@ -402,6 +402,7 @@ export default function PolicyOverview() {
               Senator Booker Announces Keep Your Pay Act
             </a>
           </li>
+        </ul>
         <ul className="list-disc list-inside space-y-1 text-gray-600">
           <li>
             Reform modeled using{' '}
