@@ -137,6 +137,9 @@ export default function PolicyOverview() {
           </a>
           .
         </p>
+        <p className="text-xs text-gray-500 mt-2">
+          This analysis is limited to the three provisions listed above. As more details of the proposal are made public, we may update this analysis.
+        </p>
       </div>
 
       {/* Bar chart comparison */}
