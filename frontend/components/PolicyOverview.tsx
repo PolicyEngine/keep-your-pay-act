@@ -16,9 +16,9 @@ import {
 } from 'recharts';
 
 const FILING_STATUSES = [
-  { key: 'single', label: 'Single', current: 16_100, proposed: 37_500, color: '#2563eb' },
-  { key: 'hoh', label: 'Head of household', current: 24_150, proposed: 56_250, color: '#059669' },
-  { key: 'joint', label: 'Married filing jointly', current: 32_200, proposed: 75_000, color: '#7c3aed' },
+  { key: 'single', label: 'Single', current: 16_100, proposed: 37_500, color: '#319795' },
+  { key: 'hoh', label: 'Head of household', current: 24_150, proposed: 56_250, color: '#285E61' },
+  { key: 'joint', label: 'Married filing jointly', current: 32_200, proposed: 75_000, color: '#1D4044' },
 ];
 
 function formatDollarFull(value: number): string {
@@ -52,6 +52,9 @@ export default function PolicyOverview() {
     }
     return points;
   }, []);
+
+  // Selected filing status for taxable income chart
+  const [selectedFs, setSelectedFs] = useState(0);
 
   // CTC by income data loaded from CSV
   const [ctcByIncomeData, setCtcByIncomeData] = useState<Array<{
@@ -170,6 +173,78 @@ export default function PolicyOverview() {
         </div>
       </div>
 
+      {/* Taxable income comparison chart — tabbed by filing status */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-3">
+          Taxable income by AGI (2026)
+        </h3>
+
+        {/* Tab buttons */}
+        <div className="flex gap-1 mb-3">
+          {FILING_STATUSES.map((f, i) => (
+            <button
+              key={f.key}
+              onClick={() => setSelectedFs(i)}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                selectedFs === i
+                  ? 'text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+              style={selectedFs === i ? { backgroundColor: f.color } : undefined}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="h-80">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart
+              data={taxableIncomeData}
+              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="agi" tickFormatter={formatDollar} type="number" allowDecimals={false} />
+              <YAxis tickFormatter={formatDollar} allowDecimals={false} domain={[0, 100000]} type="number" ticks={[0, 25000, 50000, 75000, 100000]} />
+              <Tooltip
+                formatter={(value: number) => formatDollarFull(value)}
+                labelFormatter={(label: number) => `AGI: ${formatDollarFull(label)}`}
+              />
+              <Legend />
+              <ReferenceLine
+                x={FILING_STATUSES[selectedFs].current}
+                stroke="#9CA3AF"
+                strokeDasharray="3 3"
+                label={{ value: `Current SD: ${formatDollarFull(FILING_STATUSES[selectedFs].current)}`, position: 'insideTopRight', fill: '#6b7280', fontSize: 11 }}
+              />
+              <ReferenceLine
+                x={FILING_STATUSES[selectedFs].proposed}
+                stroke={FILING_STATUSES[selectedFs].color}
+                strokeDasharray="3 3"
+                label={{ value: `Proposed SD: ${formatDollarFull(FILING_STATUSES[selectedFs].proposed)}`, position: 'insideTopLeft', fill: FILING_STATUSES[selectedFs].color, fontSize: 11 }}
+              />
+              <Line
+                type="monotone"
+                dataKey={`${FILING_STATUSES[selectedFs].key}_current`}
+                name="Current law"
+                stroke="#9CA3AF"
+                strokeWidth={2}
+                strokeDasharray="5 5"
+                dot={false}
+              />
+              <Line
+                type="monotone"
+                dataKey={`${FILING_STATUSES[selectedFs].key}_proposed`}
+                name="Keep Your Pay Act"
+                stroke={FILING_STATUSES[selectedFs].color}
+                strokeWidth={2}
+                dot={false}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
       {/* CTC by income line chart */}
       <div>
         <h3 className="text-lg font-semibold text-gray-900 mb-3">
@@ -187,6 +262,7 @@ export default function PolicyOverview() {
                 tickFormatter={formatDollar}
                 type="number"
                 domain={[0, 350000]}
+                ticks={[0, 100000, 200000, 300000]}
                 tick={{ fontSize: 12 }}
               />
               <YAxis tickFormatter={formatDollar} tick={{ fontSize: 12 }} />
@@ -235,106 +311,10 @@ export default function PolicyOverview() {
         </p>
       </div>
 
-      {/* Taxable income comparison chart */}
+      {/* EITC comparison (childless workers) (2026) */}
       <div>
         <h3 className="text-lg font-semibold text-gray-900 mb-3">
-          Taxable income by AGI: single filer
-        </h3>
-        <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart
-              data={taxableIncomeData}
-              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="agi" tickFormatter={formatDollar} type="number" allowDecimals={false} />
-              <YAxis tickFormatter={formatDollar} allowDecimals={false} />
-              <Tooltip
-                formatter={(value: number) => formatDollarFull(value)}
-                labelFormatter={(label: number) => `AGI: ${formatDollarFull(label)}`}
-              />
-              <Legend />
-              <ReferenceLine
-                x={16100}
-                stroke="#9CA3AF"
-                strokeDasharray="3 3"
-                label={{ value: 'Current zero-tax: $16,100', position: 'insideTopRight', fill: '#6b7280', fontSize: 11 }}
-              />
-              <ReferenceLine
-                x={37500}
-                stroke="#319795"
-                strokeDasharray="3 3"
-                label={{ value: 'Proposed zero-tax: $37,500', position: 'insideTopLeft', fill: '#319795', fontSize: 11 }}
-              />
-              <Line
-                type="monotone"
-                dataKey="single_current"
-                name="Current law"
-                stroke="#9CA3AF"
-                strokeWidth={2}
-                strokeDasharray="5 5"
-                dot={false}
-              />
-              <Line
-                type="monotone"
-                dataKey="single_proposed"
-                name="Keep Your Pay Act"
-                stroke="#319795"
-                strokeWidth={2}
-                dot={false}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-        <p className="text-xs text-gray-500 mt-2">
-          Under the Keep Your Pay Act, a single filer would owe zero federal income tax
-          on the first $37,500 of AGI, compared to $16,100 under current law.
-        </p>
-      </div>
-
-      {/* Child Tax Credit comparison */}
-      <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-3">
-          Child Tax Credit comparison
-        </h3>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm border-collapse">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="text-left p-3 border">Category</th>
-                <th className="text-right p-3 border">Current law</th>
-                <th className="text-right p-3 border">Keep Your Pay Act</th>
-                <th className="text-right p-3 border">Change</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="p-3 border font-medium">Child under 6</td>
-                <td className="p-3 border text-right">$2,200</td>
-                <td className="p-3 border text-right font-semibold">$4,320</td>
-                <td className="p-3 border text-right text-primary-700">+$2,120</td>
-              </tr>
-              <tr>
-                <td className="p-3 border font-medium">Child aged 6–17</td>
-                <td className="p-3 border text-right">$2,200</td>
-                <td className="p-3 border text-right font-semibold">$3,600</td>
-                <td className="p-3 border text-right text-primary-700">+$1,400</td>
-              </tr>
-              <tr>
-                <td className="p-3 border font-medium">Baby bonus (year of birth)</td>
-                <td className="p-3 border text-right">—</td>
-                <td className="p-3 border text-right font-semibold">$2,400</td>
-                <td className="p-3 border text-right text-primary-700">+$2,400</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* EITC comparison (childless workers) */}
-      <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-3">
-          EITC comparison (childless workers)
+          EITC for childless workers comparison (2026)
         </h3>
         <div className="overflow-x-auto">
           <table className="w-full text-sm border-collapse">
