@@ -3,6 +3,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import "./globals.css";
+import Header from "@/components/Header";
 
 export default function RootLayout({
   children,
@@ -31,6 +32,7 @@ export default function RootLayout({
       </head>
       <body>
         <QueryClientProvider client={queryClient}>
+          <Header />
           {children}
         </QueryClientProvider>
       </body>
