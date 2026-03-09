@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useAggregateImpact, useTenYearBudget } from '@/hooks/useAggregateImpact';
+import { useAggregateImpact } from '@/hooks/useAggregateImpact';
 import {
   BarChart,
   Bar,
@@ -67,7 +67,6 @@ interface Props {
 export default function AggregateImpact({ triggered }: Props) {
   const [selectedYear, setSelectedYear] = useState(2026);
   const { data, isLoading, error } = useAggregateImpact(triggered, selectedYear);
-  const { data: tenYearData } = useTenYearBudget(triggered);
   const [activeSection, setActiveSection] = useState<'fiscal' | 'distributional' | 'winners' | 'poverty'>('fiscal');
   const [distMode, setDistMode] = useState<'relative' | 'absolute'>('relative');
 
@@ -181,38 +180,6 @@ export default function AggregateImpact({ triggered }: Props) {
               {formatBillions(data.budget.budgetary_impact)}
             </p>
           </div>
-
-          {/* 10-year budget window */}
-          {tenYearData && (() => {
-            const tenYearTotal = tenYearData.reduce((sum, d) => sum + d.budgetary_impact, 0);
-            return (
-              <div>
-                <div className="flex items-baseline justify-between mb-4">
-                  <h3 className="text-xl font-bold text-gray-800">10-year budget window (2026–2035)</h3>
-                  <p className="text-lg font-semibold text-red-600">{formatBillions(tenYearTotal)} total</p>
-                </div>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={tenYearData} margin={CHART_MARGIN}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                    <XAxis dataKey="year" tick={TICK_STYLE} stroke="#A0AEC0" />
-                    <YAxis
-                      tickFormatter={(v: number) => formatBillions(v)}
-                      tick={TICK_STYLE}
-                      stroke="#A0AEC0"
-                      width={70}
-                    />
-                    <Tooltip content={<CustomTooltip formatter={(v) => formatBillions(v)} />} />
-                    <ReferenceLine y={0} stroke="#A0AEC0" strokeWidth={1} />
-                    <Bar dataKey="budgetary_impact" name="Budgetary impact" radius={[2, 2, 0, 0]}>
-                      {tenYearData.map((d, i) => (
-                        <Cell key={i} fill={d.budgetary_impact >= 0 ? COLORS.positive : COLORS.negative} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            );
-          })()}
 
           {/* Income bracket table */}
           <div>
