@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useAggregateImpact } from '@/hooks/useAggregateImpact';
+import { useAggregateImpact, useTenYearTotal } from '@/hooks/useAggregateImpact';
 import {
   BarChart,
   Bar,
@@ -67,6 +67,7 @@ interface Props {
 export default function AggregateImpact({ triggered }: Props) {
   const [selectedYear, setSelectedYear] = useState(2026);
   const { data, isLoading, error } = useAggregateImpact(triggered, selectedYear);
+  const { data: tenYearTotal } = useTenYearTotal(triggered);
   const [activeSection, setActiveSection] = useState<'fiscal' | 'distributional' | 'winners' | 'poverty'>('fiscal');
   const [distMode, setDistMode] = useState<'relative' | 'absolute'>('relative');
 
@@ -170,15 +171,29 @@ export default function AggregateImpact({ triggered }: Props) {
       {activeSection === 'fiscal' && (
         <div className="space-y-6">
           {/* Budget headline */}
-          <div className={`rounded-lg p-6 border ${
-            data.budget.budgetary_impact >= 0 ? 'bg-green-50 border-success' : 'bg-red-50 border-red-300'
-          }`}>
-            <p className="text-sm text-gray-700 mb-2">Budgetary impact ({selectedYear})</p>
-            <p className={`text-3xl font-bold ${
-              data.budget.budgetary_impact >= 0 ? 'text-green-600' : 'text-red-600'
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className={`rounded-lg p-6 border ${
+              data.budget.budgetary_impact >= 0 ? 'bg-green-50 border-success' : 'bg-red-50 border-red-300'
             }`}>
-              {formatBillions(data.budget.budgetary_impact)}
-            </p>
+              <p className="text-sm text-gray-700 mb-2">Budgetary impact ({selectedYear})</p>
+              <p className={`text-3xl font-bold ${
+                data.budget.budgetary_impact >= 0 ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {formatBillions(data.budget.budgetary_impact)}
+              </p>
+            </div>
+            {tenYearTotal != null && (
+              <div className={`rounded-lg p-6 border ${
+                tenYearTotal >= 0 ? 'bg-green-50 border-success' : 'bg-red-50 border-red-300'
+              }`}>
+                <p className="text-sm text-gray-700 mb-2">10-year budget window (2026–2035)</p>
+                <p className={`text-3xl font-bold ${
+                  tenYearTotal >= 0 ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  {formatBillions(tenYearTotal)}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Income bracket table */}

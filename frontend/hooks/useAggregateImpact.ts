@@ -121,3 +121,22 @@ export function useAggregateImpact(
     gcTime: 10 * 60 * 1000,
   });
 }
+
+export function useTenYearTotal(enabled: boolean) {
+  return useQuery<number>({
+    queryKey: ["tenYearTotal"],
+    queryFn: async () => {
+      const rows = await fetchCSV("metrics.csv");
+      const years = Array.from({ length: 10 }, (_, i) => 2026 + i);
+      return years.reduce((sum, year) => {
+        const row = rows.find(
+          (r) => r.variant === "reform" && r.year === year && r.metric === "budgetary_impact"
+        );
+        return sum + (row ? (row.value as number) : 0);
+      }, 0);
+    },
+    enabled,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+}
