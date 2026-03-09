@@ -63,9 +63,10 @@ export default function PolicyOverview() {
         </h2>
         <p className="text-gray-700 mb-4">
           The Keep Your Pay Act, introduced by Senator Cory Booker (D-NJ), would
-          more than double the standard deduction and expand the child tax credit.
+          more than double the standard deduction, expand the child tax credit, and
+          increase the earned income tax credit for childless workers.
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
             <h3 className="font-semibold text-gray-800 mb-2">Increased standard deduction</h3>
             <p className="text-sm text-gray-600">
@@ -79,6 +80,14 @@ export default function PolicyOverview() {
             <p className="text-sm text-gray-600">
               Increases the CTC to $4,320 per child under 6 and $3,600 per child
               aged 6–17. Adds a $2,400 &ldquo;baby bonus&rdquo; for the year a child is born.
+            </p>
+          </div>
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <h3 className="font-semibold text-gray-800 mb-2">EITC expansion for childless workers</h3>
+            <p className="text-sm text-gray-600">
+              Lowers the minimum age from 25 to 19, removes the maximum age limit,
+              and increases the maximum credit from $664 to $1,502 with a doubled
+              phase-in rate.
             </p>
           </div>
         </div>
@@ -235,6 +244,66 @@ export default function PolicyOverview() {
           <p className="text-xs text-gray-500 mt-2">
             Current-law CTC is $2,000 per qualifying child under 17 (2026 baseline).
             The baby bonus is an additional credit on top of the under-6 amount in the year of birth.
+          </p>
+        </div>
+      </div>
+
+      {/* EITC comparison (childless workers) */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-3">
+          EITC comparison (childless workers)
+        </h3>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="text-left p-3 border">Parameter</th>
+                <th className="text-right p-3 border">Current law</th>
+                <th className="text-right p-3 border">Keep Your Pay Act</th>
+                <th className="text-right p-3 border">Change</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="p-3 border font-medium">Minimum age</td>
+                <td className="p-3 border text-right">25</td>
+                <td className="p-3 border text-right font-semibold">19 (24 for students)</td>
+                <td className="p-3 border text-right text-primary-700">−6 years</td>
+              </tr>
+              <tr>
+                <td className="p-3 border font-medium">Maximum age</td>
+                <td className="p-3 border text-right">64</td>
+                <td className="p-3 border text-right font-semibold">None</td>
+                <td className="p-3 border text-right text-primary-700">Removed</td>
+              </tr>
+              <tr>
+                <td className="p-3 border font-medium">Maximum credit (0 children)</td>
+                <td className="p-3 border text-right">$664</td>
+                <td className="p-3 border text-right font-semibold">$1,502</td>
+                <td className="p-3 border text-right text-primary-700">+$838</td>
+              </tr>
+              <tr>
+                <td className="p-3 border font-medium">Phase-in rate</td>
+                <td className="p-3 border text-right">7.6%</td>
+                <td className="p-3 border text-right font-semibold">15.3%</td>
+                <td className="p-3 border text-right text-primary-700">+7.7 pp</td>
+              </tr>
+              <tr>
+                <td className="p-3 border font-medium">Phase-out rate</td>
+                <td className="p-3 border text-right">7.6%</td>
+                <td className="p-3 border text-right font-semibold">15.3%</td>
+                <td className="p-3 border text-right text-primary-700">+7.7 pp</td>
+              </tr>
+              <tr>
+                <td className="p-3 border font-medium">Phase-out start</td>
+                <td className="p-3 border text-right">$10,840</td>
+                <td className="p-3 border text-right font-semibold">$11,610</td>
+                <td className="p-3 border text-right text-primary-700">+$770</td>
+              </tr>
+            </tbody>
+          </table>
+          <p className="text-xs text-gray-500 mt-2">
+            Current-law values are for tax year 2026 (0-child EITC parameters).
           </p>
         </div>
       </div>

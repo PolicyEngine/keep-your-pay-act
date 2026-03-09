@@ -2,6 +2,8 @@
 
 Interactive calculator for estimating the impact of Senator Cory Booker's Keep Your Pay Act.
 
+**Live site:** https://keep-your-pay-act.vercel.app
+
 ## Structure
 
 - **frontend/** — Next.js 14 dashboard (Tailwind, React Query, Recharts)
@@ -16,6 +18,7 @@ Interactive calculator for estimating the impact of Senator Cory Booker's Keep Y
 ```bash
 cd frontend
 npm install
+
 npm run dev    # runs on http://localhost:3008
 ```
 
@@ -37,4 +40,4 @@ python scripts/precompute.py    # JSON for backend aggregate endpoint
 
 ## Status
 
-Scaffolding complete. Reform parameters and calculation logic will be added once the bill text is available.
+Reform parameters wired up (PE policy ID 96180). Microsimulation pipeline pending.
