@@ -86,6 +86,7 @@ function HouseholdImpactTab() {
   const [ageSpouse, setAgeSpouse] = useState<number | null>(null);
   const [married, setMarried] = useState(false);
   const [dependentAges, setDependentAges] = useState<number[]>([]);
+  const [expectingBaby, setExpectingBaby] = useState(false);
   const [income, setIncome] = useState(75000);
   const [stateCode, setStateCode] = useState('CA');
   const [maxEarnings, setMaxEarnings] = useState(500000);
@@ -110,10 +111,13 @@ function HouseholdImpactTab() {
     return isNaN(num) ? 0 : num;
   };
 
+  // Prepend age-0 dependent for baby bonus when expecting
+  const allDependentAges = expectingBaby ? [0, ...dependentAges] : dependentAges;
+
   const request: HouseholdRequest = {
     age_head: ageHead,
     age_spouse: married ? ageSpouse : null,
-    dependent_ages: dependentAges,
+    dependent_ages: allDependentAges,
     income,
     year: 2026,
     max_earnings: maxEarnings,
@@ -130,7 +134,7 @@ function HouseholdImpactTab() {
       {/* Inline household config */}
       <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Your household</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* AGI */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -234,6 +238,31 @@ function HouseholdImpactTab() {
                   />
                 ))}
               </div>
+            )}
+          </div>
+
+          {/* Expecting a baby */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Baby bonus</label>
+            <div className="flex items-center space-x-2 py-2">
+              <input
+                type="checkbox"
+                id="expectingBaby"
+                checked={expectingBaby}
+                onChange={(e) => {
+                  setExpectingBaby(e.target.checked);
+                  setTriggered(true);
+                }}
+                className="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded"
+              />
+              <label htmlFor="expectingBaby" className="text-sm text-gray-700">
+                Expecting a baby this year
+              </label>
+            </div>
+            {expectingBaby && (
+              <p className="text-xs text-gray-500 mt-1">
+                Adds a $2,400 baby bonus on top of the under-6 CTC
+              </p>
             )}
           </div>
 
