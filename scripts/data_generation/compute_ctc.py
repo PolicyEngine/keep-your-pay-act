@@ -1,7 +1,7 @@
 """Compute CTC values by income for different child ages.
 
 Generates CSV with CTC values for:
-- Single person with newborn (age 0)
+- Single person with child under 1 (age 0)
 - Single person with 5 year old
 - Single person with 10 year old
 Under both current law and the Keep Your Pay Act reform.
@@ -67,15 +67,12 @@ def build_situation(child_age: int, year: int = 2026, max_income: int = 350_000)
     }
 
 
-def compute_ctc_for_child_age(child_age: int, reform=None, use_refundable_only: bool = False) -> tuple[np.ndarray, np.ndarray]:
+def compute_ctc_for_child_age(child_age: int, reform=None) -> tuple[np.ndarray, np.ndarray]:
     """Compute CTC values across income range for a given child age.
 
     Args:
         child_age: Age of the child
         reform: Optional reform to apply
-        use_refundable_only: If True, use refundable_ctc (for current law where
-            only $1,700 is refundable). If False, use ctc_value (for reform
-            where CTC is fully refundable under AFA).
     """
     situation = build_situation(child_age, YEAR, MAX_INCOME)
 
@@ -85,14 +82,7 @@ def compute_ctc_for_child_age(child_age: int, reform=None, use_refundable_only: 
         sim = Simulation(situation=situation)
 
     income = sim.calculate("employment_income", period=YEAR, map_to="tax_unit")
-
-    if use_refundable_only:
-        # For current law: only the refundable portion (ACTC, max $1,700) is
-        # actual cash received. The non-refundable portion requires tax liability.
-        ctc = sim.calculate("refundable_ctc", period=YEAR, map_to="tax_unit")
-    else:
-        # For reform (AFA): CTC is fully refundable, so use ctc_value
-        ctc = sim.calculate("ctc_value", period=YEAR, map_to="tax_unit")
+    ctc = sim.calculate("ctc_value", period=YEAR, map_to="tax_unit")
 
     return income, ctc
 
@@ -102,12 +92,11 @@ def main():
     reform = create_reform(year=YEAR)
 
     # Compute for current law (use age 10, CTC is same for all qualifying children)
-    # Use refundable_only=True since current law CTC has only $1,700 refundable
     print("  Current law...")
-    income, ctc_current = compute_ctc_for_child_age(10, reform=None, use_refundable_only=True)
+    income, ctc_current = compute_ctc_for_child_age(10, reform=None)
 
     # Compute for each child age under reform
-    print("  Reform - newborn...")
+    print("  Reform - child under 1...")
     _, ctc_reform_newborn = compute_ctc_for_child_age(0, reform=reform)
     print("  Reform - age 5...")
     _, ctc_reform_5 = compute_ctc_for_child_age(5, reform=reform)

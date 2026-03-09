@@ -113,7 +113,7 @@ export default function PolicyOverview() {
           </div>
         </div>
         <p className="text-xs text-gray-500">
-          We assume the enhanced Child Tax Credit behaves the same as the proposed Child Tax Credit in the{' '}
+          We assume the expanded Child Tax Credit behaves the same as the proposed Child Tax Credit in the{' '}
           <a
             href="https://www.bennet.senate.gov/wp-content/uploads/2025/04/American-Family-Act-2025.pdf"
             target="_blank"
@@ -222,7 +222,7 @@ export default function PolicyOverview() {
               <Line
                 type="monotone"
                 dataKey="reform_newborn"
-                name="Newborn"
+                name="Child under 1"
                 stroke="#234E52"
                 strokeWidth={2}
                 dot={false}
@@ -231,7 +231,7 @@ export default function PolicyOverview() {
           </ResponsiveContainer>
         </div>
         <p className="text-xs text-gray-500 mt-2">
-          The newborn credit of $6,360 includes the $2,400 baby bonus in the birth month plus the under-6 credit of $360/month for the remaining 11 months ($3,960).
+          Children under the age of 1 would receive a combined credit of $6,360 as they are entitled to the $2,400 baby bonus for their birth month and $360/month for the remaining 11 months ($3,960).
         </p>
       </div>
 
