@@ -35,7 +35,7 @@ export default function Home() {
       <div className="bg-primary-500 text-white py-8 px-4 shadow-md">
         <div className="max-w-5xl mx-auto">
           <h1 className="text-4xl font-bold mb-2">
-            Keep Your Pay Act Calculator
+            Keep Your Pay Act
           </h1>
           <p className="text-lg opacity-90">
             Estimate the impact of Senator Booker&apos;s proposed tax reform
