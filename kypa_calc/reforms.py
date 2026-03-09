@@ -128,6 +128,20 @@ POLICY_JSON = {
         "2034-01-01.2034-12-31": 88500,
         "2035-01-01.2035-12-31": 90300,
     },
+    # AFA CTC phase-out thresholds — reset to stated values for 2026.
+    # PE's built-in AFA indexed from 2025; KYPA starts in 2026.
+    "gov.contrib.congress.afa.ctc.phase_out.threshold.lower.JOINT": {
+        "2026-01-01.2026-12-31": 150000,
+    },
+    "gov.contrib.congress.afa.ctc.phase_out.threshold.lower.SINGLE": {
+        "2026-01-01.2026-12-31": 112500,
+    },
+    "gov.contrib.congress.afa.ctc.phase_out.threshold.lower.SURVIVING_SPOUSE": {
+        "2026-01-01.2026-12-31": 150000,
+    },
+    "gov.contrib.congress.afa.ctc.phase_out.threshold.lower.HEAD_OF_HOUSEHOLD": {
+        "2026-01-01.2026-12-31": 112500,
+    },
 }
 
 

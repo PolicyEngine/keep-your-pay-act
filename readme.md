@@ -40,4 +40,4 @@ python scripts/precompute.py    # JSON for backend aggregate endpoint
 
 ## Status
 
-Reform parameters wired up (PE policy ID 96180). Microsimulation pipeline pending.
+Reform parameters wired up (PE policy ID 96180). Precomputed data generated for 2026.

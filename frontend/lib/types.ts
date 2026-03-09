@@ -1,5 +1,5 @@
 export interface ReformParams {
-  // TODO: Add reform-specific toggle params once bill details are known
+  // Keep Your Pay Act uses a single reform variant — no toggles needed
 }
 
 export interface HouseholdRequest {

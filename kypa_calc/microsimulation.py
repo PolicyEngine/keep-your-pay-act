@@ -62,8 +62,19 @@ def calculate_aggregate_impact(year: int = 2026) -> dict:
 
     affected = abs(income_change) > 1
     affected_count = float(affected.sum())
+
+    # Use numpy for correct weighted average (MicroSeries sum/sum gives wrong result)
+    household_weight_early = sim_reform.calculate(
+        "household_weight", period=year
+    )
+    affected_mask = np.array(affected).astype(bool)
+    change_arr_early = np.array(income_change)
+    weight_arr_early = np.array(household_weight_early)
     avg_benefit = (
-        float(income_change[affected].sum() / affected.sum())
+        float(np.average(
+            change_arr_early[affected_mask],
+            weights=weight_arr_early[affected_mask],
+        ))
         if affected_count > 0
         else 0.0
     )
