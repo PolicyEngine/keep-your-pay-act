@@ -62,9 +62,11 @@ function CustomTooltip({ active, payload, label, formatter }: {
 
 interface Props {
   triggered: boolean;
+  rateIncreaseEnabled: boolean;
+  setRateIncreaseEnabled: (v: boolean) => void;
 }
 
-export default function AggregateImpact({ triggered }: Props) {
+export default function AggregateImpact({ triggered, rateIncreaseEnabled, setRateIncreaseEnabled }: Props) {
   const [selectedYear, setSelectedYear] = useState(2026);
   const { data, isLoading, error } = useAggregateImpact(triggered, selectedYear);
   const { data: tenYearTotal } = useTenYearTotal(triggered);
@@ -129,6 +131,35 @@ export default function AggregateImpact({ triggered }: Props) {
       <p className="text-sm text-gray-500 bg-gray-50 rounded-lg px-4 py-3 border border-gray-200">
         These estimates are static: they do not capture behavioral responses such as changes in labor supply, tax avoidance, or migration.
       </p>
+
+      {/* Top rate increase toggle */}
+      <div className={`flex items-center justify-between p-3 rounded-lg border ${
+        false /* TODO: enable when microsim ready */
+          ? 'bg-gray-50 border-gray-200'
+          : 'bg-gray-100 border-gray-200 opacity-60'
+      }`}>
+        <div>
+          <p className={`font-semibold text-sm ${false ? 'text-gray-800' : 'text-gray-500'}`}>
+            Top rate increases
+          </p>
+          <p className="text-xs text-gray-400 mt-0.5">
+            35% → 41%, 37% → 43% (coming soon)
+          </p>
+        </div>
+        <button
+          onClick={() => setRateIncreaseEnabled(!rateIncreaseEnabled)}
+          disabled={true /* TODO: enable when microsim ready */}
+          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+            rateIncreaseEnabled ? 'bg-gray-400' : 'bg-gray-300'
+          } cursor-not-allowed`}
+        >
+          <span
+            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+              rateIncreaseEnabled ? 'translate-x-6' : 'translate-x-1'
+            }`}
+          />
+        </button>
+      </div>
 
       {/* Year selector */}
       <div>

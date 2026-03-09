@@ -287,23 +287,32 @@ function HouseholdImpactTab() {
           </div>
 
           {/* Top rate increase toggle */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Top rate increases</label>
-            <div className="flex items-center space-x-2 py-2">
-              <input
-                type="checkbox"
-                id="rateIncrease"
-                checked={rateIncreaseEnabled}
-                onChange={(e) => setRateIncreaseEnabled(e.target.checked)}
-                className="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded"
-              />
-              <label htmlFor="rateIncrease" className="text-sm text-gray-700">
-                Include top rate increases
-              </label>
+          <div className={`flex items-center justify-between p-3 rounded-lg border ${
+            false /* TODO: enable when microsim ready */
+              ? 'bg-gray-50 border-gray-200'
+              : 'bg-gray-100 border-gray-200 opacity-60'
+          }`}>
+            <div>
+              <p className={`font-semibold text-sm ${false ? 'text-gray-800' : 'text-gray-500'}`}>
+                Top rate increases
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">
+                35% → 41%, 37% → 43% (coming soon)
+              </p>
             </div>
-            <p className="text-xs text-gray-500">
-              Raises the 35% bracket to 41% and 37% bracket to 43%
-            </p>
+            <button
+              onClick={() => setRateIncreaseEnabled(!rateIncreaseEnabled)}
+              disabled={true /* TODO: enable when microsim ready */}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                rateIncreaseEnabled ? 'bg-gray-400' : 'bg-gray-300'
+              } cursor-not-allowed`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  rateIncreaseEnabled ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
           </div>
         </div>
 
@@ -351,9 +360,15 @@ function HouseholdImpactTab() {
 
 /** National impact tab */
 function NationalImpactTab() {
+  const [rateIncreaseEnabled, setRateIncreaseEnabled] = useState(true);
+
   return (
     <div className="space-y-6">
-      <AggregateImpact triggered={true} />
+      <AggregateImpact
+        triggered={true}
+        rateIncreaseEnabled={rateIncreaseEnabled}
+        setRateIncreaseEnabled={setRateIncreaseEnabled}
+      />
     </div>
   );
 }

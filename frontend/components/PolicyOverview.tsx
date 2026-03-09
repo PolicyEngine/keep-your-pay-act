@@ -394,6 +394,16 @@ export default function PolicyOverview() {
               Senator Booker Announces Keep Your Pay Act
             </a>
           </li>
+          <li>
+            <a
+              href="https://x.com/CoryBooker/status/2031042375192133807"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary-600 hover:underline"
+            >
+              Senator Booker&apos;s reply to Matt Yglesias
+            </a>
+          </li>
         </ul>
       </div>
     </div>
