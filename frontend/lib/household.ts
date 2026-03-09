@@ -35,7 +35,7 @@ export function buildHouseholdSituation(
   const axisMax = Math.max(max_earnings, income);
 
   const situation: Record<string, any> = {
-    people: { you: { age: { [yearStr]: age_head } } },
+    people: { you: { age: { [yearStr]: age_head }, employment_income: { [yearStr]: null } } },
     families: { "your family": { members: ["you"] } },
     marital_units: { "your marital unit": { members: ["you"] } },
     spm_units: { "your household": { members: ["you"] } },
@@ -55,12 +55,12 @@ export function buildHouseholdSituation(
     axes: [
       [
         {
-          name: "adjusted_gross_income",
+          name: "employment_income",
           min: 0,
           max: axisMax,
           count: Math.min(4001, Math.max(501, Math.floor(axisMax / 500))),
           period: yearStr,
-          target: "tax_unit",
+          target: "person",
         },
       ],
     ],

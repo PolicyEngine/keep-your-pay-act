@@ -94,8 +94,8 @@ export const api = {
         "household_net_income"
       ][yearStr];
     const incomeRange: number[] =
-      baselineResult.result.tax_units["your tax unit"][
-        "adjusted_gross_income"
+      baselineResult.result.people["you"][
+        "employment_income"
       ][yearStr];
 
     // Compute net income change at each point
