@@ -121,3 +121,31 @@ export function useAggregateImpact(
     gcTime: 10 * 60 * 1000,
   });
 }
+
+const YEARS = Array.from({ length: 10 }, (_, i) => 2026 + i);
+
+export interface YearlyBudget {
+  year: number;
+  budgetary_impact: number;
+}
+
+export function useTenYearBudget(enabled: boolean) {
+  return useQuery<YearlyBudget[]>({
+    queryKey: ["tenYearBudget"],
+    queryFn: async () => {
+      const rows = await fetchCSV("metrics.csv");
+      return YEARS.map((year) => {
+        const row = rows.find(
+          (r) => r.variant === "reform" && r.year === year && r.metric === "budgetary_impact"
+        );
+        return {
+          year,
+          budgetary_impact: row ? (row.value as number) : 0,
+        };
+      });
+    },
+    enabled,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+}
