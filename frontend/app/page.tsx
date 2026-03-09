@@ -143,53 +143,56 @@ function HouseholdImpactTab() {
   return (
     <div className="space-y-6">
       {/* Inline household config */}
-      <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Your household</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <section className="bg-gray-50 rounded-xl p-6 md:p-8 border border-gray-200 shadow-sm">
+        <h2 className="text-xl font-bold text-gray-900 mb-6">Your household</h2>
+
+        {/* Row 1: Income, Age, Filing status */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-5">
           {/* AGI */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-600 mb-1.5">
               Adjusted gross income
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span>
               <input
                 type="text"
                 value={formatNumber(income)}
                 onChange={(e) => setIncome(parseNumber(e.target.value))}
-                className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full pl-6 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
               />
             </div>
           </div>
 
           {/* Age */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Your age</label>
+            <label className="block text-sm font-medium text-gray-600 mb-1.5">Your age</label>
             <input
               type="number"
               value={ageHead}
               onChange={(e) => setAgeHead(Math.max(18, Math.min(100, parseInt(e.target.value) || 18)))}
               min={18}
               max={100}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
             />
           </div>
 
           {/* Married + spouse age */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Filing status</label>
-            <div className="flex items-center space-x-2 py-2">
+            <label className="block text-sm font-medium text-gray-600 mb-1.5">Filing status</label>
+            <label
+              htmlFor="married"
+              className="flex items-center gap-3 w-full px-3 py-2 bg-white border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+            >
               <input
                 type="checkbox"
                 id="married"
                 checked={married}
                 onChange={(e) => handleMarriedChange(e.target.checked)}
-                className="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded"
+                className="w-4 h-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
               />
-              <label htmlFor="married" className="text-sm text-gray-700">
-                Married filing jointly
-              </label>
-            </div>
+              <span className="text-sm text-gray-700">Married filing jointly</span>
+            </label>
             {married && (
               <input
                 type="number"
@@ -199,26 +202,29 @@ function HouseholdImpactTab() {
                 max={100}
                 placeholder="Spouse age"
                 aria-label="Spouse age"
-                className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                className="w-full mt-2 px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
               />
             )}
           </div>
+        </div>
 
+        {/* Row 2: Dependents, Baby bonus, State */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-5 mt-5">
           {/* Dependents */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Dependents</label>
+            <label className="block text-sm font-medium text-gray-600 mb-1.5">Dependents</label>
             <input
               type="number"
               value={dependentAges.length}
               onChange={(e) => handleDependentCountChange(Math.max(0, Math.min(10, parseInt(e.target.value) || 0)))}
               min={0}
               max={10}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
             />
             {dependentAges.length > 0 && (
               <div className="mt-2">
-                <label className="block text-xs font-medium text-gray-500 mb-1">Age(s)</label>
-                <div className="grid grid-cols-3 gap-1">
+                <span className="block text-xs font-medium text-gray-500 mb-1">Age(s)</span>
+                <div className="grid grid-cols-3 gap-1.5">
                 {dependentAges.map((age, i) => (
                   <input
                     key={i}
@@ -231,7 +237,7 @@ function HouseholdImpactTab() {
                     }}
                     min={0}
                     max={26}
-                    className="px-2 py-1 border border-gray-300 rounded text-sm"
+                    className="px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
                     placeholder={`Age ${i + 1}`}
                     aria-label={`Dependent ${i + 1} age`}
                   />
@@ -243,21 +249,22 @@ function HouseholdImpactTab() {
 
           {/* Expecting a baby */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Baby bonus</label>
-            <div className="flex items-center space-x-2 py-2">
+            <label className="block text-sm font-medium text-gray-600 mb-1.5">Baby bonus</label>
+            <label
+              htmlFor="expectingBaby"
+              className="flex items-center gap-3 w-full px-3 py-2 bg-white border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+            >
               <input
                 type="checkbox"
                 id="expectingBaby"
                 checked={expectingBaby}
                 onChange={(e) => setExpectingBaby(e.target.checked)}
-                className="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded"
+                className="w-4 h-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
               />
-              <label htmlFor="expectingBaby" className="text-sm text-gray-700">
-                Expecting a baby this year
-              </label>
-            </div>
+              <span className="text-sm text-gray-700">Expecting a baby this year</span>
+            </label>
             {expectingBaby && (
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 mt-2 leading-relaxed">
                 Adds a $2,400 baby bonus on top of the under-6 CTC ($6,360 total)
               </p>
             )}
@@ -265,11 +272,12 @@ function HouseholdImpactTab() {
 
           {/* State */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+            <label className="block text-sm font-medium text-gray-600 mb-1.5">State</label>
             <select
               value={stateCode}
               onChange={(e) => setStateCode(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors appearance-none"
+              style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center' }}
             >
               {US_STATES.map((s) => (
                 <option key={s.code} value={s.code}>{s.name}</option>
@@ -279,15 +287,15 @@ function HouseholdImpactTab() {
         </div>
 
         {/* Calculate button */}
-        <div className="pt-4 border-t border-gray-200">
+        <div className="mt-8">
           <button
             onClick={handleCalculate}
-            className="py-2.5 px-8 rounded-lg font-semibold text-white bg-primary-500 hover:bg-primary-600 transition-colors shadow-sm sm:w-auto w-full"
+            className="py-3 px-10 rounded-lg font-semibold text-white bg-primary-500 hover:bg-primary-600 active:bg-primary-700 transition-all shadow-sm hover:shadow-md sm:w-auto w-full"
           >
             Calculate impact
           </button>
         </div>
-      </div>
+      </section>
 
       {/* Chart x-axis options */}
       {triggered && (
