@@ -1,16 +1,24 @@
+"""Household impact endpoint."""
+
 from fastapi import APIRouter
-from app.api.models.requests import HouseholdRequest
-from app.api.models.responses import HouseholdImpactResponse
+
+from ..models.requests import HouseholdRequest
+from ..models.responses import HouseholdImpactResponse
+from ...services.calculator import calculate_household_impact
 
 router = APIRouter()
 
 
-@router.post("/household-impact")
-async def household_impact(request: HouseholdRequest) -> HouseholdImpactResponse:
-    import sys
-    import os
-
-    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
-    from kypa_calc.household import calculate_household_impact
-
-    return calculate_household_impact(request.model_dump())
+@router.post("/household-impact", response_model=HouseholdImpactResponse)
+async def household_impact(request: HouseholdRequest):
+    """Calculate KYPA impact for a specific household across income range."""
+    result = await calculate_household_impact(
+        age_head=request.age_head,
+        age_spouse=request.age_spouse,
+        dependent_ages=request.dependent_ages,
+        income=request.income,
+        year=request.year,
+        max_earnings=request.max_earnings,
+        state_code=request.state_code,
+    )
+    return result

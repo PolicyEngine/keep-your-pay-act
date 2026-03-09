@@ -1,20 +1,25 @@
-"""
-Keep Your Pay Act reform definition.
+"""Create Keep Your Pay Act reform objects."""
 
-TODO: Implement actual reform once bill details are available.
-This module should create a PolicyEngine Reform object encoding
-the provisions of the Keep Your Pay Act.
-"""
+import json
+import os
+
+from policyengine_core.reforms import Reform
+
+# Load reform parameters from JSON config
+_REFORM_PARAMS_PATH = os.path.join(os.path.dirname(__file__), "reform_params.json")
+
+with open(_REFORM_PARAMS_PATH) as f:
+    KYPA_REFORM_DICT = json.load(f)
 
 
-def create_reform(year: int = 2026):
-    """Create the Keep Your Pay Act reform for the given year.
-
-    Returns a tuple of (structural_reform, param_reform) or a single Reform.
+def create_kypa_reform(year: int = 2026):
     """
-    # TODO: Implement once bill text is available
-    # from policyengine_us.reforms.congress.kypa import create_kypa
-    # from policyengine_core.reforms import Reform
-    raise NotImplementedError(
-        "Reform not yet implemented — waiting on bill details."
-    )
+    Create a Keep Your Pay Act reform.
+
+    Args:
+        year: Tax year (unused — reform covers all years 2026-2035).
+
+    Returns:
+        A PolicyEngine Reform object.
+    """
+    return Reform.from_dict(KYPA_REFORM_DICT, country_id="us")

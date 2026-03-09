@@ -1,75 +1,86 @@
-"""
-Household impact calculator.
+"""Build PolicyEngine household situations for KYPA calculations."""
 
-Builds a PolicyEngine situation dict and runs baseline vs. reform
-simulations across an AGI axis sweep.
-"""
-
-import numpy as np
+_GROUP_UNITS = ["families", "spm_units", "tax_units", "households"]
 
 
-def build_situation(
+def _add_member_to_units(situation, member_id):
+    """Append a member to all group units (families, spm, tax, households)."""
+    for unit in _GROUP_UNITS:
+        key = next(iter(situation[unit]))
+        situation[unit][key]["members"].append(member_id)
+
+
+def build_household_situation(
     age_head: int,
     age_spouse: int | None,
     dependent_ages: list[int],
-    income: float,
-    year: int,
-    state_code: str,
-    max_earnings: float,
+    year: int = 2026,
+    with_axes: bool = False,
+    max_earnings: int = 2_000_000,
+    state_code: str = "CA",
 ) -> dict:
-    """Build a PolicyEngine situation dict with an AGI axes sweep."""
-    members = {"head": {"age": {str(year): age_head}}}
-    marital_unit_members = ["head"]
+    """
+    Build a PolicyEngine household situation dict.
 
-    if age_spouse is not None:
-        members["spouse"] = {"age": {str(year): age_spouse}}
-        marital_unit_members.append("spouse")
+    Args:
+        age_head: Age of household head.
+        age_spouse: Age of spouse (None if single).
+        dependent_ages: List of dependent ages.
+        year: Tax year.
+        with_axes: If True, adds AGI sweep axis.
+        max_earnings: Maximum AGI for the sweep axis.
+        state_code: Two-letter US state code.
 
-    for i, age in enumerate(dependent_ages):
-        members[f"dep_{i}"] = {"age": {str(year): age}}
-
-    all_members = list(members.keys())
-
+    Returns:
+        PolicyEngine situation dict.
+    """
     situation = {
-        "people": members,
-        "tax_units": {
-            "tax_unit": {"members": all_members}
-        },
-        "spm_units": {
-            "spm_unit": {"members": all_members}
-        },
+        "people": {"you": {"age": {year: age_head}}},
+        "families": {"your family": {"members": ["you"]}},
+        "marital_units": {"your marital unit": {"members": ["you"]}},
+        "spm_units": {"your household": {"members": ["you"]}},
+        "tax_units": {"your tax unit": {"members": ["you"]}},
         "households": {
-            "household": {
-                "members": all_members,
-                "state_code": {str(year): state_code},
+            "your household": {
+                "members": ["you"],
+                "state_code": {year: state_code},
             }
         },
-        "marital_units": {
-            "marital_unit": {"members": marital_unit_members}
-        },
-        "families": {
-            "family": {"members": all_members}
-        },
-        "axes": [
+    }
+
+    if with_axes:
+        situation["axes"] = [
             [
                 {
                     "name": "adjusted_gross_income",
                     "min": 0,
                     "max": max_earnings,
-                    "count": 200,
-                    "period": str(year),
+                    "count": min(4_001, max(501, max_earnings // 500)),
+                    "period": year,
+                    "target": "tax_unit",
                 }
             ]
-        ],
-    }
+        ]
+
+    if age_spouse is not None:
+        situation["people"]["your partner"] = {"age": {year: age_spouse}}
+        _add_member_to_units(situation, "your partner")
+        situation["marital_units"]["your marital unit"]["members"].append(
+            "your partner"
+        )
+
+    for i, dep_age in enumerate(dependent_ages):
+        if i == 0:
+            child_id = "your first dependent"
+        elif i == 1:
+            child_id = "your second dependent"
+        else:
+            child_id = f"dependent_{i + 1}"
+
+        situation["people"][child_id] = {"age": {year: dep_age}}
+        _add_member_to_units(situation, child_id)
+        situation["marital_units"][f"{child_id}'s marital unit"] = {
+            "members": [child_id]
+        }
+
     return situation
-
-
-def calculate_household_impact(params: dict) -> dict:
-    """Run baseline and reform simulations and return impact data.
-
-    TODO: Wire up actual reform once implemented.
-    """
-    raise NotImplementedError(
-        "Household calculator not yet implemented — waiting on reform details."
-    )
