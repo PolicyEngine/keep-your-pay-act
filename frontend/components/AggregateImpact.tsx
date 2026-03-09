@@ -169,26 +169,16 @@ export default function AggregateImpact({ triggered }: Props) {
       {/* ===== FISCAL IMPACT ===== */}
       {activeSection === 'fiscal' && (
         <div className="space-y-6">
-          {/* Budget breakdown cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {[
-              { label: 'Tax revenue', value: data.budget.tax_revenue_impact },
-              { label: 'Net budgetary impact', value: data.budget.budgetary_impact },
-            ].map(({ label, value }) => (
-              <div
-                key={label}
-                className={`rounded-lg p-6 border ${
-                  value >= 0 ? 'bg-green-50 border-success' : 'bg-red-50 border-red-300'
-                }`}
-              >
-                <p className="text-sm text-gray-700 mb-2">{label} ({selectedYear})</p>
-                <p className={`text-3xl font-bold ${
-                  value >= 0 ? 'text-green-600' : 'text-red-600'
-                }`}>
-                  {formatBillions(value)}
-                </p>
-              </div>
-            ))}
+          {/* Budget headline */}
+          <div className={`rounded-lg p-6 border ${
+            data.budget.budgetary_impact >= 0 ? 'bg-green-50 border-success' : 'bg-red-50 border-red-300'
+          }`}>
+            <p className="text-sm text-gray-700 mb-2">Budgetary impact ({selectedYear})</p>
+            <p className={`text-3xl font-bold ${
+              data.budget.budgetary_impact >= 0 ? 'text-green-600' : 'text-red-600'
+            }`}>
+              {formatBillions(data.budget.budgetary_impact)}
+            </p>
           </div>
 
           {/* Income bracket table */}
