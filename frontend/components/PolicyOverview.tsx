@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import {
   ResponsiveContainer,
   BarChart,
@@ -10,7 +10,6 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  Cell,
   LineChart,
   Line,
   ReferenceLine,
@@ -43,7 +42,7 @@ export default function PolicyOverview() {
 
   const taxableIncomeData = useMemo(() => {
     const points = [];
-    for (let agi = 0; agi <= 120_000; agi += 1_000) {
+    for (let agi = 0; agi <= 120_000; agi += 500) {
       const point: Record<string, number> = { agi };
       for (const fs of FILING_STATUSES) {
         point[`${fs.key}_current`] = Math.max(0, agi - fs.current);
@@ -52,6 +51,28 @@ export default function PolicyOverview() {
       points.push(point);
     }
     return points;
+  }, []);
+
+  // CTC by income data loaded from CSV
+  const [ctcByIncomeData, setCtcByIncomeData] = useState<Array<{
+    income: number;
+    current_law: number;
+    reform_newborn: number;
+    reform_under6: number;
+    reform_6to17: number;
+  }>>([]);
+
+  useEffect(() => {
+    fetch('/data/ctc_by_income.csv')
+      .then(res => res.text())
+      .then(csv => {
+        const lines = csv.trim().split('\n');
+        const data = lines.slice(1).map(line => {
+          const [income, current_law, reform_newborn, reform_under6, reform_6to17] = line.split(',').map(Number);
+          return { income, current_law, reform_newborn, reform_under6, reform_6to17 };
+        });
+        setCtcByIncomeData(data);
+      });
   }, []);
 
   return (
@@ -63,10 +84,10 @@ export default function PolicyOverview() {
         </h2>
         <p className="text-gray-700 mb-4">
           The Keep Your Pay Act, introduced by Senator Cory Booker (D-NJ), would
-          more than double the standard deduction, expand the child tax credit, and
-          increase the earned income tax credit for childless workers.
+          more than double the standard deduction, expand the Child Tax Credit, and
+          increase the Earned Income Tax Credit for childless workers.
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
             <h3 className="font-semibold text-gray-800 mb-2">Increased standard deduction</h3>
             <p className="text-sm text-gray-600">
@@ -76,7 +97,7 @@ export default function PolicyOverview() {
             </p>
           </div>
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <h3 className="font-semibold text-gray-800 mb-2">Expanded child tax credit</h3>
+            <h3 className="font-semibold text-gray-800 mb-2">Expanded Child Tax Credit</h3>
             <p className="text-sm text-gray-600">
               Increases the CTC to $4,320 per child under 6 and $3,600 per child
               aged 6–17. Adds a $2,400 &ldquo;baby bonus&rdquo; for the year a child is born.
@@ -91,47 +112,33 @@ export default function PolicyOverview() {
             </p>
           </div>
         </div>
-      </div>
-
-      {/* Standard deduction comparison table */}
-      <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-3">
-          Standard deduction comparison
-        </h3>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm border-collapse">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="text-left p-3 border">Filing status</th>
-                <th className="text-right p-3 border">Current law</th>
-                <th className="text-right p-3 border">Keep Your Pay Act</th>
-                <th className="text-right p-3 border">Increase</th>
-              </tr>
-            </thead>
-            <tbody>
-              {FILING_STATUSES.map((fs) => (
-                <tr key={fs.key}>
-                  <td className="p-3 border font-medium">{fs.label}</td>
-                  <td className="p-3 border text-right">{formatDollarFull(fs.current)}</td>
-                  <td className="p-3 border text-right font-semibold">{formatDollarFull(fs.proposed)}</td>
-                  <td className="p-3 border text-right text-primary-700">
-                    +{formatDollarFull(fs.proposed - fs.current)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <p className="text-xs text-gray-500 mt-2">
-            Head of household amount estimated at 1.5x the single filer amount, consistent
-            with the current-law ratio. Current-law values are for tax year 2026.
-          </p>
-        </div>
+        <p className="text-xs text-gray-500">
+          We assume the enhanced Child Tax Credit behaves the same as the proposed Child Tax Credit in the{' '}
+          <a
+            href="https://www.bennet.senate.gov/wp-content/uploads/2025/04/American-Family-Act-2025.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary-600 hover:underline"
+          >
+            American Family Act
+          </a>
+          , and the EITC expansion is the same as the proposal in the{' '}
+          <a
+            href="https://www.cortezmasto.senate.gov/wp-content/uploads/2025/04/OTT25089.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary-600 hover:underline"
+          >
+            Tax Cuts for Workers Act
+          </a>
+          .
+        </p>
       </div>
 
       {/* Bar chart comparison */}
       <div>
         <h3 className="text-lg font-semibold text-gray-900 mb-3">
-          Standard deduction: current law vs. proposed
+          Standard deduction: current law vs. proposed (2026)
         </h3>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
@@ -139,13 +146,93 @@ export default function PolicyOverview() {
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis dataKey="label" tick={{ fontSize: 12 }} />
               <YAxis tickFormatter={formatDollar} tick={{ fontSize: 12 }} />
-              <Tooltip formatter={(value: number) => formatDollarFull(value)} />
+              <Tooltip
+                content={({ active, payload, label }) => {
+                  if (!active || !payload?.length) return null;
+                  const current = payload.find(p => p.dataKey === 'Current law')?.value as number;
+                  const proposed = payload.find(p => p.dataKey === 'Keep Your Pay Act')?.value as number;
+                  const increase = proposed - current;
+                  return (
+                    <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-lg">
+                      <p className="font-semibold text-gray-900 mb-2">{label}</p>
+                      <p className="text-sm text-gray-600">Current law: {formatDollarFull(current)}</p>
+                      <p className="text-sm text-gray-600">Keep Your Pay Act: {formatDollarFull(proposed)}</p>
+                      <p className="text-sm font-semibold text-primary-700 mt-1">Increase: +{formatDollarFull(increase)}</p>
+                    </div>
+                  );
+                }}
+              />
               <Legend />
               <Bar dataKey="Current law" fill="#9CA3AF" radius={[2, 2, 0, 0]} />
               <Bar dataKey="Keep Your Pay Act" fill="#319795" radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
+      </div>
+
+      {/* CTC by income line chart */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-3">
+          Child Tax Credit by income: single parent of one child (2026)
+        </h3>
+        <div className="h-80">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart
+              data={ctcByIncomeData}
+              margin={{ top: 10, right: 30, left: 20, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis
+                dataKey="income"
+                tickFormatter={formatDollar}
+                type="number"
+                domain={[0, 350000]}
+                tick={{ fontSize: 12 }}
+              />
+              <YAxis tickFormatter={formatDollar} tick={{ fontSize: 12 }} />
+              <Tooltip
+                formatter={(value: number) => formatDollarFull(value)}
+                labelFormatter={(label: number) => `Income: ${formatDollarFull(label)}`}
+              />
+              <Legend />
+              <Line
+                type="monotone"
+                dataKey="current_law"
+                name="Current law"
+                stroke="#9CA3AF"
+                strokeWidth={2}
+                dot={false}
+              />
+              <Line
+                type="monotone"
+                dataKey="reform_6to17"
+                name="Child 6-17"
+                stroke="#81E6D9"
+                strokeWidth={2}
+                dot={false}
+              />
+              <Line
+                type="monotone"
+                dataKey="reform_under6"
+                name="Child under 6"
+                stroke="#319795"
+                strokeWidth={2}
+                dot={false}
+              />
+              <Line
+                type="monotone"
+                dataKey="reform_newborn"
+                name="Newborn"
+                stroke="#234E52"
+                strokeWidth={2}
+                dot={false}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+        <p className="text-xs text-gray-500 mt-2">
+          The newborn credit of $6,360 includes the $2,400 baby bonus in the birth month plus the under-6 credit of $360/month for the remaining 11 months ($3,960).
+        </p>
       </div>
 
       {/* Taxable income comparison chart */}
@@ -192,7 +279,7 @@ export default function PolicyOverview() {
                 type="monotone"
                 dataKey="single_proposed"
                 name="Keep Your Pay Act"
-                stroke="#2563eb"
+                stroke="#319795"
                 strokeWidth={2}
                 dot={false}
               />
@@ -205,10 +292,10 @@ export default function PolicyOverview() {
         </p>
       </div>
 
-      {/* Child tax credit comparison */}
+      {/* Child Tax Credit comparison */}
       <div>
         <h3 className="text-lg font-semibold text-gray-900 mb-3">
-          Child tax credit comparison
+          Child Tax Credit comparison
         </h3>
         <div className="overflow-x-auto">
           <table className="w-full text-sm border-collapse">
@@ -223,15 +310,15 @@ export default function PolicyOverview() {
             <tbody>
               <tr>
                 <td className="p-3 border font-medium">Child under 6</td>
-                <td className="p-3 border text-right">$2,000</td>
+                <td className="p-3 border text-right">$2,200</td>
                 <td className="p-3 border text-right font-semibold">$4,320</td>
-                <td className="p-3 border text-right text-primary-700">+$2,320</td>
+                <td className="p-3 border text-right text-primary-700">+$2,120</td>
               </tr>
               <tr>
                 <td className="p-3 border font-medium">Child aged 6–17</td>
-                <td className="p-3 border text-right">$2,000</td>
+                <td className="p-3 border text-right">$2,200</td>
                 <td className="p-3 border text-right font-semibold">$3,600</td>
-                <td className="p-3 border text-right text-primary-700">+$1,600</td>
+                <td className="p-3 border text-right text-primary-700">+$1,400</td>
               </tr>
               <tr>
                 <td className="p-3 border font-medium">Baby bonus (year of birth)</td>
@@ -242,7 +329,7 @@ export default function PolicyOverview() {
             </tbody>
           </table>
           <p className="text-xs text-gray-500 mt-2">
-            Current-law CTC is $2,000 per qualifying child under 17 (2026 baseline).
+            Current-law CTC is $2,200 per qualifying child under 17 (2026 baseline).
             The baby bonus is an additional credit on top of the under-6 amount in the year of birth.
           </p>
         </div>
@@ -284,15 +371,15 @@ export default function PolicyOverview() {
               </tr>
               <tr>
                 <td className="p-3 border font-medium">Phase-in rate</td>
-                <td className="p-3 border text-right">7.6%</td>
+                <td className="p-3 border text-right">7.65%</td>
                 <td className="p-3 border text-right font-semibold">15.3%</td>
-                <td className="p-3 border text-right text-primary-700">+7.7 pp</td>
+                <td className="p-3 border text-right text-primary-700">+7.65 pp</td>
               </tr>
               <tr>
                 <td className="p-3 border font-medium">Phase-out rate</td>
-                <td className="p-3 border text-right">7.6%</td>
+                <td className="p-3 border text-right">7.65%</td>
                 <td className="p-3 border text-right font-semibold">15.3%</td>
-                <td className="p-3 border text-right text-primary-700">+7.7 pp</td>
+                <td className="p-3 border text-right text-primary-700">+7.65 pp</td>
               </tr>
               <tr>
                 <td className="p-3 border font-medium">Phase-out start</td>
@@ -311,7 +398,18 @@ export default function PolicyOverview() {
       {/* Sources */}
       <div className="border-t pt-4 text-sm text-gray-500">
         <p className="font-medium mb-1">Sources</p>
-        <p className="text-gray-400 italic">Bill text and additional sources to be added.</p>
+        <ul className="list-disc list-inside space-y-1">
+          <li>
+            <a
+              href="https://www.booker.senate.gov/news/press/booker-announces-keep-your-pay-act"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary-600 hover:underline"
+            >
+              Senator Booker Announces Keep Your Pay Act
+            </a>
+          </li>
+        </ul>
       </div>
     </div>
   );
