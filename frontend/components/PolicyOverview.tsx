@@ -1,0 +1,249 @@
+'use client';
+
+import { useMemo } from 'react';
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  Cell,
+  LineChart,
+  Line,
+  ReferenceLine,
+} from 'recharts';
+
+const FILING_STATUSES = [
+  { key: 'single', label: 'Single', current: 16_100, proposed: 37_500, color: '#2563eb' },
+  { key: 'hoh', label: 'Head of household', current: 24_150, proposed: 56_250, color: '#059669' },
+  { key: 'joint', label: 'Married filing jointly', current: 32_200, proposed: 75_000, color: '#7c3aed' },
+];
+
+function formatDollarFull(value: number): string {
+  return `$${value.toLocaleString()}`;
+}
+
+function formatDollar(value: number): string {
+  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
+  if (value >= 1_000) return `$${(value / 1_000).toFixed(0)}k`;
+  return `$${value.toFixed(0)}`;
+}
+
+export default function PolicyOverview() {
+  const comparisonData = FILING_STATUSES.map((fs) => ({
+    label: fs.label,
+    'Current law': fs.current,
+    'Keep Your Pay Act': fs.proposed,
+    increase: fs.proposed - fs.current,
+    pctIncrease: ((fs.proposed - fs.current) / fs.current * 100),
+  }));
+
+  const taxableIncomeData = useMemo(() => {
+    const points = [];
+    for (let agi = 0; agi <= 120_000; agi += 1_000) {
+      const point: Record<string, number> = { agi };
+      for (const fs of FILING_STATUSES) {
+        point[`${fs.key}_current`] = Math.max(0, agi - fs.current);
+        point[`${fs.key}_proposed`] = Math.max(0, agi - fs.proposed);
+      }
+      points.push(point);
+    }
+    return points;
+  }, []);
+
+  return (
+    <div className="space-y-10">
+      {/* Summary */}
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          Keep Your Pay Act
+        </h2>
+        <p className="text-gray-700 mb-4">
+          The Keep Your Pay Act, introduced by Senator Cory Booker (D-NJ), would
+          more than double the standard deduction and expand the child tax credit.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <h3 className="font-semibold text-gray-800 mb-2">Increased standard deduction</h3>
+            <p className="text-sm text-gray-600">
+              Raises the standard deduction from $32,200 to $75,000 for married
+              couples ($16,100 to $37,500 for single filers), reducing taxable
+              income for households that do not itemize.
+            </p>
+          </div>
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <h3 className="font-semibold text-gray-800 mb-2">Expanded child tax credit</h3>
+            <p className="text-sm text-gray-600">
+              Increases the CTC to $4,320 per child under 6 and $3,600 per child
+              aged 6–17. Adds a $2,400 &ldquo;baby bonus&rdquo; for the year a child is born.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Standard deduction comparison table */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-3">
+          Standard deduction comparison
+        </h3>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="text-left p-3 border">Filing status</th>
+                <th className="text-right p-3 border">Current law</th>
+                <th className="text-right p-3 border">Keep Your Pay Act</th>
+                <th className="text-right p-3 border">Increase</th>
+              </tr>
+            </thead>
+            <tbody>
+              {FILING_STATUSES.map((fs) => (
+                <tr key={fs.key}>
+                  <td className="p-3 border font-medium">{fs.label}</td>
+                  <td className="p-3 border text-right">{formatDollarFull(fs.current)}</td>
+                  <td className="p-3 border text-right font-semibold">{formatDollarFull(fs.proposed)}</td>
+                  <td className="p-3 border text-right text-primary-700">
+                    +{formatDollarFull(fs.proposed - fs.current)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="text-xs text-gray-500 mt-2">
+            Head of household amount estimated at 1.5x the single filer amount, consistent
+            with the current-law ratio. Current-law values are for tax year 2026.
+          </p>
+        </div>
+      </div>
+
+      {/* Bar chart comparison */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-3">
+          Standard deduction: current law vs. proposed
+        </h3>
+        <div className="h-80">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={comparisonData} margin={{ top: 10, right: 30, left: 20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="label" tick={{ fontSize: 12 }} />
+              <YAxis tickFormatter={formatDollar} tick={{ fontSize: 12 }} />
+              <Tooltip formatter={(value: number) => formatDollarFull(value)} />
+              <Legend />
+              <Bar dataKey="Current law" fill="#9CA3AF" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="Keep Your Pay Act" fill="#319795" radius={[2, 2, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Taxable income comparison chart */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-3">
+          Taxable income by AGI: single filer
+        </h3>
+        <div className="h-80">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart
+              data={taxableIncomeData}
+              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="agi" tickFormatter={formatDollar} type="number" allowDecimals={false} />
+              <YAxis tickFormatter={formatDollar} allowDecimals={false} />
+              <Tooltip
+                formatter={(value: number) => formatDollarFull(value)}
+                labelFormatter={(label: number) => `AGI: ${formatDollarFull(label)}`}
+              />
+              <Legend />
+              <ReferenceLine
+                x={16100}
+                stroke="#9CA3AF"
+                strokeDasharray="3 3"
+                label={{ value: 'Current zero-tax: $16,100', position: 'insideTopRight', fill: '#6b7280', fontSize: 11 }}
+              />
+              <ReferenceLine
+                x={37500}
+                stroke="#319795"
+                strokeDasharray="3 3"
+                label={{ value: 'Proposed zero-tax: $37,500', position: 'insideTopLeft', fill: '#319795', fontSize: 11 }}
+              />
+              <Line
+                type="monotone"
+                dataKey="single_current"
+                name="Current law"
+                stroke="#9CA3AF"
+                strokeWidth={2}
+                strokeDasharray="5 5"
+                dot={false}
+              />
+              <Line
+                type="monotone"
+                dataKey="single_proposed"
+                name="Keep Your Pay Act"
+                stroke="#2563eb"
+                strokeWidth={2}
+                dot={false}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+        <p className="text-xs text-gray-500 mt-2">
+          Under the Keep Your Pay Act, a single filer would owe zero federal income tax
+          on the first $37,500 of AGI, compared to $16,100 under current law.
+        </p>
+      </div>
+
+      {/* Child tax credit comparison */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-3">
+          Child tax credit comparison
+        </h3>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="text-left p-3 border">Category</th>
+                <th className="text-right p-3 border">Current law</th>
+                <th className="text-right p-3 border">Keep Your Pay Act</th>
+                <th className="text-right p-3 border">Change</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="p-3 border font-medium">Child under 6</td>
+                <td className="p-3 border text-right">$2,000</td>
+                <td className="p-3 border text-right font-semibold">$4,320</td>
+                <td className="p-3 border text-right text-primary-700">+$2,320</td>
+              </tr>
+              <tr>
+                <td className="p-3 border font-medium">Child aged 6–17</td>
+                <td className="p-3 border text-right">$2,000</td>
+                <td className="p-3 border text-right font-semibold">$3,600</td>
+                <td className="p-3 border text-right text-primary-700">+$1,600</td>
+              </tr>
+              <tr>
+                <td className="p-3 border font-medium">Baby bonus (year of birth)</td>
+                <td className="p-3 border text-right">—</td>
+                <td className="p-3 border text-right font-semibold">$2,400</td>
+                <td className="p-3 border text-right text-primary-700">+$2,400</td>
+              </tr>
+            </tbody>
+          </table>
+          <p className="text-xs text-gray-500 mt-2">
+            Current-law CTC is $2,000 per qualifying child under 17 (2026 baseline).
+            The baby bonus is an additional credit on top of the under-6 amount in the year of birth.
+          </p>
+        </div>
+      </div>
+
+      {/* Sources */}
+      <div className="border-t pt-4 text-sm text-gray-500">
+        <p className="font-medium mb-1">Sources</p>
+        <p className="text-gray-400 italic">Bill text and additional sources to be added.</p>
+      </div>
+    </div>
+  );
+}
