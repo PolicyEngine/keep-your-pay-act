@@ -66,7 +66,8 @@ export default function PolicyOverview() {
   }>>([]);
 
   useEffect(() => {
-    fetch('/data/ctc_by_income.csv')
+    const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+    fetch(`${basePath}/data/ctc_by_income.csv`)
       .then(res => res.text())
       .then(csv => {
         const lines = csv.trim().split('\n');
