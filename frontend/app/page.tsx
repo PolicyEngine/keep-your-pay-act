@@ -206,7 +206,9 @@ function HouseholdImpactTab() {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
             />
             {dependentAges.length > 0 && (
-              <div className="grid grid-cols-3 gap-1 mt-2">
+              <div className="mt-2">
+                <label className="block text-xs font-medium text-gray-500 mb-1">Age(s)</label>
+                <div className="grid grid-cols-3 gap-1">
                 {dependentAges.map((age, i) => (
                   <input
                     key={i}
@@ -223,6 +225,7 @@ function HouseholdImpactTab() {
                     placeholder={`Age ${i + 1}`}
                   />
                 ))}
+                </div>
               </div>
             )}
           </div>
@@ -244,7 +247,7 @@ function HouseholdImpactTab() {
             </div>
             {expectingBaby && (
               <p className="text-xs text-gray-500 mt-1">
-                Adds a $2,400 baby bonus on top of the under-6 CTC
+                Adds a $2,400 baby bonus on top of the under-6 CTC ($6,360 total)
               </p>
             )}
           </div>

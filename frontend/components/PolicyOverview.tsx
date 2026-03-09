@@ -307,7 +307,7 @@ export default function PolicyOverview() {
           </ResponsiveContainer>
         </div>
         <p className="text-xs text-gray-500 mt-2">
-          Children under the age of 1 would receive a combined credit of $6,360 as they are entitled to the $2,400 baby bonus for their birth month and $360/month for the remaining 11 months ($3,960).
+          Children under the age of 1 would receive a combined credit of $6,360 as they are entitled to the $2,400 baby bonus for their birth month and $360/month for the remaining 11 months ($3,960). The AFA phases down the CTC from its maximum amounts per child to $2,000, beginning at $112,500 for head of household filers. The AFA also raises the head of household threshold for the normal CTC phase-out from $200,000 to $300,000.
         </p>
       </div>
 
