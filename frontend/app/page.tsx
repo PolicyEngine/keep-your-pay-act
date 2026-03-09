@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import ImpactAnalysis from '@/components/ImpactAnalysis';
 import AggregateImpact from '@/components/AggregateImpact';
 import PolicyOverview from '@/components/PolicyOverview';
@@ -91,6 +91,7 @@ function HouseholdImpactTab() {
   const [stateCode, setStateCode] = useState('CA');
   const [maxEarnings, setMaxEarnings] = useState(500000);
   const [triggered, setTriggered] = useState(false);
+  const [submittedRequest, setSubmittedRequest] = useState<HouseholdRequest | null>(null);
 
   const handleMarriedChange = (value: boolean) => {
     setMarried(value);
@@ -114,7 +115,7 @@ function HouseholdImpactTab() {
   // Prepend age-0 dependent for baby bonus when expecting
   const allDependentAges = expectingBaby ? [0, ...dependentAges] : dependentAges;
 
-  const request: HouseholdRequest = {
+  const buildRequest = (): HouseholdRequest => ({
     age_head: ageHead,
     age_spouse: married ? ageSpouse : null,
     dependent_ages: allDependentAges,
@@ -123,11 +124,12 @@ function HouseholdImpactTab() {
     max_earnings: maxEarnings,
     state_code: stateCode,
     reform_params: {},
-  };
+  });
 
-  useEffect(() => {
+  const handleCalculate = () => {
+    setSubmittedRequest(buildRequest());
     setTriggered(true);
-  }, []);
+  };
 
   return (
     <div className="space-y-6">
@@ -145,10 +147,7 @@ function HouseholdImpactTab() {
               <input
                 type="text"
                 value={formatNumber(income)}
-                onChange={(e) => {
-                  setIncome(parseNumber(e.target.value));
-                  setTriggered(true);
-                }}
+                onChange={(e) => setIncome(parseNumber(e.target.value))}
                 className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
@@ -160,10 +159,7 @@ function HouseholdImpactTab() {
             <input
               type="number"
               value={ageHead}
-              onChange={(e) => {
-                setAgeHead(Math.max(18, Math.min(100, parseInt(e.target.value) || 18)));
-                setTriggered(true);
-              }}
+              onChange={(e) => setAgeHead(Math.max(18, Math.min(100, parseInt(e.target.value) || 18)))}
               min={18}
               max={100}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -178,10 +174,7 @@ function HouseholdImpactTab() {
                 type="checkbox"
                 id="married"
                 checked={married}
-                onChange={(e) => {
-                  handleMarriedChange(e.target.checked);
-                  setTriggered(true);
-                }}
+                onChange={(e) => handleMarriedChange(e.target.checked)}
                 className="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded"
               />
               <label htmlFor="married" className="text-sm text-gray-700">
@@ -192,10 +185,7 @@ function HouseholdImpactTab() {
               <input
                 type="number"
                 value={ageSpouse ?? 35}
-                onChange={(e) => {
-                  setAgeSpouse(Math.max(18, Math.min(100, parseInt(e.target.value) || 18)));
-                  setTriggered(true);
-                }}
+                onChange={(e) => setAgeSpouse(Math.max(18, Math.min(100, parseInt(e.target.value) || 18)))}
                 min={18}
                 max={100}
                 placeholder="Spouse age"
@@ -210,10 +200,7 @@ function HouseholdImpactTab() {
             <input
               type="number"
               value={dependentAges.length}
-              onChange={(e) => {
-                handleDependentCountChange(Math.max(0, Math.min(10, parseInt(e.target.value) || 0)));
-                setTriggered(true);
-              }}
+              onChange={(e) => handleDependentCountChange(Math.max(0, Math.min(10, parseInt(e.target.value) || 0)))}
               min={0}
               max={10}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -229,7 +216,6 @@ function HouseholdImpactTab() {
                       const newAges = [...dependentAges];
                       newAges[i] = Math.max(0, Math.min(26, parseInt(e.target.value) || 0));
                       setDependentAges(newAges);
-                      setTriggered(true);
                     }}
                     min={0}
                     max={26}
@@ -249,10 +235,7 @@ function HouseholdImpactTab() {
                 type="checkbox"
                 id="expectingBaby"
                 checked={expectingBaby}
-                onChange={(e) => {
-                  setExpectingBaby(e.target.checked);
-                  setTriggered(true);
-                }}
+                onChange={(e) => setExpectingBaby(e.target.checked)}
                 className="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded"
               />
               <label htmlFor="expectingBaby" className="text-sm text-gray-700">
@@ -271,10 +254,7 @@ function HouseholdImpactTab() {
             <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
             <select
               value={stateCode}
-              onChange={(e) => {
-                setStateCode(e.target.value);
-                setTriggered(true);
-              }}
+              onChange={(e) => setStateCode(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
             >
               {US_STATES.map((s) => (
@@ -283,28 +263,45 @@ function HouseholdImpactTab() {
             </select>
           </div>
         </div>
+
+        {/* Calculate button */}
+        <div className="pt-4 border-t border-gray-200">
+          <button
+            onClick={handleCalculate}
+            className="py-2.5 px-8 rounded-lg font-semibold text-white bg-primary-500 hover:bg-primary-600 transition-colors shadow-sm sm:w-auto w-full"
+          >
+            Calculate impact
+          </button>
+        </div>
       </div>
 
       {/* Chart x-axis options */}
-      <div className="flex items-center gap-2 text-sm text-gray-600">
-        <span>Chart x-axis max:</span>
-        {[200000, 500000, 1000000, 2000000, 5000000, 10000000].map((v) => (
-          <button
-            key={v}
-            onClick={() => setMaxEarnings(v)}
-            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-              maxEarnings === v
-                ? 'bg-primary-500 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            ${v >= 1000000 ? `${v / 1000000}M` : `${v / 1000}k`}
-          </button>
-        ))}
-      </div>
+      {triggered && (
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <span>Chart x-axis max:</span>
+          {[200000, 500000, 1000000, 2000000, 5000000, 10000000].map((v) => (
+            <button
+              key={v}
+              onClick={() => {
+                setMaxEarnings(v);
+                setSubmittedRequest(prev => prev ? { ...prev, max_earnings: v } : null);
+              }}
+              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                maxEarnings === v
+                  ? 'bg-primary-500 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              ${v >= 1000000 ? `${v / 1000000}M` : `${v / 1000}k`}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Impact results */}
-      <ImpactAnalysis request={request} triggered={triggered} maxEarnings={maxEarnings} />
+      {submittedRequest && (
+        <ImpactAnalysis request={submittedRequest} triggered={triggered} maxEarnings={maxEarnings} />
+      )}
     </div>
   );
 }
