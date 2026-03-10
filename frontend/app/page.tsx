@@ -147,10 +147,10 @@ function HouseholdImpactTab() {
 
         {/* Row 1: Income, Age, Filing status */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-5">
-          {/* AGI */}
+          {/* Employment income */}
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-1.5">
-              Adjusted gross income
+              Employment income
             </label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span>

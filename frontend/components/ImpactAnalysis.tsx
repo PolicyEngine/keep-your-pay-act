@@ -72,7 +72,7 @@ export default function ImpactAnalysis({ request, triggered, maxEarnings }: Prop
       <div>
         <h3 className="text-xl font-bold text-gray-800 mb-4">Your personal impact ({request?.year ?? 2026})</h3>
         <p className="text-gray-600 mb-4">
-          Based on your adjusted gross income of <strong>{formatCurrency(request?.income ?? 0)}</strong>
+          Based on your employment income of <strong>{formatCurrency(request?.income ?? 0)}</strong>
         </p>
 
         <div
@@ -106,7 +106,7 @@ export default function ImpactAnalysis({ request, triggered, maxEarnings }: Prop
       {/* Chart */}
       <div className="bg-white border rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4 text-gray-800">
-          Change in net income by adjusted gross income ({request?.year ?? 2026})
+          Change in net income by employment income ({request?.year ?? 2026})
         </h3>
         <ResponsiveContainer width="100%" height={400}>
           <LineChart data={chartData} margin={{ left: 20, right: 20, top: 5, bottom: 5 }}>
