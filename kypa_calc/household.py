@@ -52,12 +52,11 @@ def build_household_situation(
         situation["axes"] = [
             [
                 {
-                    "name": "adjusted_gross_income",
+                    "name": "employment_income",
                     "min": 0,
                     "max": max_earnings,
                     "count": min(4_001, max(501, max_earnings // 500)),
                     "period": year,
-                    "target": "tax_unit",
                 }
             ]
         ]
