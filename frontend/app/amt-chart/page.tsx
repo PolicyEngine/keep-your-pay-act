@@ -70,8 +70,8 @@ function CustomTooltip({
   label?: number;
 }) {
   if (!active || !payload?.length || label === undefined) return null;
-  const bracket = payload.find((p) => p.name === 'bracket')?.value ?? 0;
-  const actual = payload.find((p) => p.name === 'actual')?.value ?? 0;
+  const bracket = payload.find((p) => p.name === 'Bracket savings (no AMT)')?.value ?? 0;
+  const actual = payload.find((p) => p.name === 'Actual savings (with AMT)')?.value ?? 0;
   const clawback = bracket - actual;
   return (
     <div
