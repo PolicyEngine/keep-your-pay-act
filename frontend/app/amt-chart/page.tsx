@@ -101,6 +101,8 @@ function CustomTooltip({
   );
 }
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
 export default function AmtChartPage() {
   return (
     <div
@@ -108,24 +110,11 @@ export default function AmtChartPage() {
         width: '100%',
         maxWidth: 900,
         margin: '0 auto',
-        padding: 24,
+        padding: '16px 24px',
         fontFamily: 'Inter, sans-serif',
       }}
     >
-      <h2 style={{ fontSize: 18, fontWeight: 600, textAlign: 'center', margin: '0 0 4px' }}>
-        KYPA tax savings with and without AMT
-      </h2>
-      <p
-        style={{
-          fontSize: 13,
-          color: '#718096',
-          textAlign: 'center',
-          margin: '0 0 16px',
-        }}
-      >
-        Married filing jointly, standard deduction only, Texas, 2026
-      </p>
-      <ResponsiveContainer width="100%" height={400}>
+      <ResponsiveContainer width="100%" height={420}>
         <AreaChart data={data} margin={{ top: 10, right: 20, bottom: 30, left: 60 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
           <XAxis
@@ -178,6 +167,19 @@ export default function AmtChartPage() {
           />
         </AreaChart>
       </ResponsiveContainer>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={`${basePath}/policyengine-logo-teal.png`}
+        alt=""
+        aria-hidden="true"
+        style={{
+          display: 'block',
+          marginLeft: 'auto',
+          width: 80,
+          opacity: 0.8,
+          marginTop: 4,
+        }}
+      />
     </div>
   );
 }
