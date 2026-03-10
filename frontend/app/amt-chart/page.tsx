@@ -53,11 +53,6 @@ const data = [
 const TEAL = '#319795';
 const GRAY = '#718096';
 
-function formatDollar(value: number) {
-  if (value >= 1000) return `$${(value / 1000).toFixed(0)}k`;
-  return `$${value}`;
-}
-
 function formatIncome(value: number) {
   if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
   if (value >= 1000) return `$${(value / 1000).toFixed(0)}k`;
