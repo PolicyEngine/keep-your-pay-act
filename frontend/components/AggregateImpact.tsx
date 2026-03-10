@@ -13,6 +13,7 @@ import {
   ReferenceLine,
   Cell,
 } from 'recharts';
+import ChartWatermark from './ChartWatermark';
 
 // App-v2 color tokens
 const COLORS = {
@@ -279,32 +280,33 @@ export default function AggregateImpact({ triggered }: Props) {
                 : 'Average change in household net income in dollars, by decile.'}
             </p>
             <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={chartData} margin={CHART_MARGIN}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                <XAxis dataKey="decile" tick={TICK_STYLE} stroke="#A0AEC0" label={{ value: 'Income decile', position: 'insideBottom', offset: -15, style: { ...TICK_STYLE, fill: '#718096' } }} />
-                <YAxis
-                  domain={symmetricDomain}
-                  ticks={niceTicks}
-                  tickFormatter={isRelative
-                    ? (v: number) => `${v >= 0 ? '+' : ''}${v.toFixed(1)}%`
-                    : formatCurrencyWithSign}
-                  tick={TICK_STYLE}
-                  stroke="#A0AEC0"
-                  width={isRelative ? 60 : 80}
-                  allowDecimals={false}
-                />
-                <Tooltip content={<CustomTooltip formatter={isRelative
-                  ? (v) => `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`
-                  : (v) => formatCurrencyWithSign(v)} />}
-                />
-                <ReferenceLine y={0} stroke="#A0AEC0" strokeWidth={1} />
-                <Bar dataKey="value" name={isRelative ? 'Relative impact (% of income)' : 'Average impact'} radius={[2, 2, 0, 0]}>
-                  {rawValues.map((v, i) => (
-                    <Cell key={i} fill={v >= 0 ? COLORS.positive : COLORS.negative} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+                <BarChart data={chartData} margin={CHART_MARGIN}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                  <XAxis dataKey="decile" tick={TICK_STYLE} stroke="#A0AEC0" label={{ value: 'Income decile', position: 'insideBottom', offset: -15, style: { ...TICK_STYLE, fill: '#718096' } }} />
+                  <YAxis
+                    domain={symmetricDomain}
+                    ticks={niceTicks}
+                    tickFormatter={isRelative
+                      ? (v: number) => `${v >= 0 ? '+' : ''}${v.toFixed(1)}%`
+                      : formatCurrencyWithSign}
+                    tick={TICK_STYLE}
+                    stroke="#A0AEC0"
+                    width={isRelative ? 60 : 80}
+                    allowDecimals={false}
+                  />
+                  <Tooltip content={<CustomTooltip formatter={isRelative
+                    ? (v) => `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`
+                    : (v) => formatCurrencyWithSign(v)} />}
+                  />
+                  <ReferenceLine y={0} stroke="#A0AEC0" strokeWidth={1} />
+                  <Bar dataKey="value" name={isRelative ? 'Relative impact (% of income)' : 'Average impact'} radius={[2, 2, 0, 0]}>
+                    {rawValues.map((v, i) => (
+                      <Cell key={i} fill={v >= 0 ? COLORS.positive : COLORS.negative} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            <ChartWatermark />
           </div>
         );
       })()}
@@ -361,16 +363,17 @@ export default function AggregateImpact({ triggered }: Props) {
               <h3 className="text-lg font-semibold text-gray-800 mb-3">Winners & losers by income decile</h3>
               <div className="bg-white border rounded-lg p-6">
                 <ResponsiveContainer width="100%" height={400}>
-                  <BarChart data={stackedData} layout="vertical" stackOffset="expand" barSize={24} margin={CHART_MARGIN}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                    <XAxis type="number" tickFormatter={(v: number) => `${(v * 100).toFixed(0)}%`} tick={TICK_STYLE} stroke="#A0AEC0" />
-                    <YAxis type="category" dataKey="label" tick={TICK_STYLE} stroke="#A0AEC0" width={40} />
-                    <Tooltip content={<CustomTooltip formatter={(v) => `${v.toFixed(1)}%`} />} />
-                    {categories.map((c) => (
-                      <Bar key={c.key} dataKey={c.key} stackId="a" fill={c.color} name={c.label} />
-                    ))}
-                  </BarChart>
-                </ResponsiveContainer>
+                    <BarChart data={stackedData} layout="vertical" stackOffset="expand" barSize={24} margin={CHART_MARGIN}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                      <XAxis type="number" tickFormatter={(v: number) => `${(v * 100).toFixed(0)}%`} tick={TICK_STYLE} stroke="#A0AEC0" />
+                      <YAxis type="category" dataKey="label" tick={TICK_STYLE} stroke="#A0AEC0" width={40} />
+                      <Tooltip content={<CustomTooltip formatter={(v) => `${v.toFixed(1)}%`} />} />
+                      {categories.map((c) => (
+                        <Bar key={c.key} dataKey={c.key} stackId="a" fill={c.color} name={c.label} />
+                      ))}
+                    </BarChart>
+                  </ResponsiveContainer>
+                <ChartWatermark />
                 {/* Custom legend */}
                 <div className="flex flex-wrap justify-center gap-4 mt-4">
                   {categories.map((c) => (
@@ -442,19 +445,20 @@ export default function AggregateImpact({ triggered }: Props) {
             <div>
               <h3 className="text-lg font-semibold text-gray-800 mb-3">Change in poverty rates (%)</h3>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={chartData} margin={CHART_MARGIN}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                  <XAxis dataKey="label" tick={TICK_STYLE} stroke="#A0AEC0" />
-                  <YAxis domain={[niceMin, niceMax]} ticks={niceTicks} tickFormatter={(v: number) => `${v >= 0 ? '+' : ''}${v.toFixed(0)}%`} tick={TICK_STYLE} stroke="#A0AEC0" width={70} allowDecimals={false} />
-                  <Tooltip content={<CustomTooltip formatter={(v) => `${v >= 0 ? '+' : ''}${v.toFixed(1)}%`} />} />
-                  <ReferenceLine y={0} stroke="#A0AEC0" strokeWidth={1} />
-                  <Bar dataKey="pctChange" name="Change (%)" radius={[2, 2, 0, 0]}>
-                    {chartData.map((m, i) => (
-                      <Cell key={i} fill={m.pctChange <= 0 ? COLORS.positive : COLORS.negative} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+                  <BarChart data={chartData} margin={CHART_MARGIN}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                    <XAxis dataKey="label" tick={TICK_STYLE} stroke="#A0AEC0" />
+                    <YAxis domain={[niceMin, niceMax]} ticks={niceTicks} tickFormatter={(v: number) => `${v >= 0 ? '+' : ''}${v.toFixed(0)}%`} tick={TICK_STYLE} stroke="#A0AEC0" width={70} allowDecimals={false} />
+                    <Tooltip content={<CustomTooltip formatter={(v) => `${v >= 0 ? '+' : ''}${v.toFixed(1)}%`} />} />
+                    <ReferenceLine y={0} stroke="#A0AEC0" strokeWidth={1} />
+                    <Bar dataKey="pctChange" name="Change (%)" radius={[2, 2, 0, 0]}>
+                      {chartData.map((m, i) => (
+                        <Cell key={i} fill={m.pctChange <= 0 ? COLORS.positive : COLORS.negative} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              <ChartWatermark />
             </div>
           </div>
         );
