@@ -135,8 +135,11 @@ export default function AmtChartPage() {
           <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
           <XAxis
             dataKey="income"
+            type="number"
+            domain={[0, 'dataMax']}
             tickFormatter={formatIncome}
             tick={{ fontFamily: 'Inter, sans-serif', fontSize: 12 }}
+            ticks={[0, 200000, 400000, 600000, 800000, 1000000]}
             label={{
               value: 'Household income',
               position: 'insideBottom',
