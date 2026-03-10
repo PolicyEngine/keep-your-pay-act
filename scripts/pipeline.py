@@ -73,13 +73,29 @@ def _completed_years(existing: dict[str, pd.DataFrame]) -> set[int]:
     return completed
 
 
-def _append_rows(existing: dict[str, pd.DataFrame], name: str, rows: list[dict]) -> None:
-    """Append rows to an existing DataFrame in the dict."""
-    new_df = pd.DataFrame(rows)
-    if existing[name].empty:
-        existing[name] = new_df
-    else:
-        existing[name] = pd.concat([existing[name], new_df], ignore_index=True)
+def _append_rows(
+    pending: dict[str, list[list[dict]]],
+    name: str,
+    rows: list[dict],
+) -> None:
+    """Buffer rows for later concat (avoids quadratic DataFrame copies)."""
+    pending[name].append(rows)
+
+
+def _flush_pending(
+    existing: dict[str, pd.DataFrame],
+    pending: dict[str, list[list[dict]]],
+) -> None:
+    """Concat all pending rows into existing DataFrames in one pass."""
+    for name in CSV_FILES:
+        if not pending[name]:
+            continue
+        new_df = pd.DataFrame([row for batch in pending[name] for row in batch])
+        if existing[name].empty:
+            existing[name] = new_df
+        else:
+            existing[name] = pd.concat([existing[name], new_df], ignore_index=True)
+        pending[name].clear()
 
 
 def _extract_distributional(result: dict, variant: str, year: int) -> list[dict]:
@@ -213,22 +229,25 @@ def generate_all_data(output_dir: str = None, fresh: bool = False) -> dict[str, 
 
     print(f"Years to compute: {remaining}")
 
+    pending: dict[str, list[list[dict]]] = {name: [] for name in CSV_FILES}
+
     for i, year in enumerate(remaining):
         print(f"\n[{i + 1}/{len(remaining)}] Year {year}...")
 
         year_results = _run_year_subprocess(year)
 
         for variant, result in year_results.items():
-            _append_rows(existing, "distributional_impact",
+            _append_rows(pending, "distributional_impact",
                          _extract_distributional(result, variant, year))
-            _append_rows(existing, "metrics",
+            _append_rows(pending, "metrics",
                          _extract_metrics(result, variant, year))
-            _append_rows(existing, "winners_losers",
+            _append_rows(pending, "winners_losers",
                          _extract_winners_losers(result, variant, year))
-            _append_rows(existing, "income_brackets",
+            _append_rows(pending, "income_brackets",
                          _extract_income_brackets(result, variant, year))
 
-        # Save all CSVs after each year
+        # Flush pending rows and save all CSVs after each year
+        _flush_pending(existing, pending)
         for name in CSV_FILES:
             _save_csv(existing[name], os.path.join(output_dir, f"{name}.csv"))
 

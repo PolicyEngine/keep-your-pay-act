@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useAggregateImpact, useTenYearTotal } from '@/hooks/useAggregateImpact';
+import RateIncreaseToggle from '@/components/RateIncreaseToggle';
 import {
   BarChart,
   Bar,
@@ -63,10 +64,10 @@ function CustomTooltip({ active, payload, label, formatter }: {
 interface Props {
   triggered: boolean;
   rateIncreaseEnabled: boolean;
-  setRateIncreaseEnabled: (v: boolean) => void;
+  onToggleRateIncrease: (v: boolean) => void;
 }
 
-export default function AggregateImpact({ triggered, rateIncreaseEnabled, setRateIncreaseEnabled }: Props) {
+export default function AggregateImpact({ triggered, rateIncreaseEnabled, onToggleRateIncrease }: Props) {
   const [selectedYear, setSelectedYear] = useState(2026);
   const { data, isLoading, error } = useAggregateImpact(triggered, selectedYear, rateIncreaseEnabled);
   const { data: tenYearTotal } = useTenYearTotal(triggered, rateIncreaseEnabled);
@@ -128,33 +129,10 @@ export default function AggregateImpact({ triggered, rateIncreaseEnabled, setRat
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-primary">National impact analysis</h2>
 
-      {/* Top rate increase toggle */}
-      <div className={`flex items-center justify-between p-3 rounded-lg border ${
-        rateIncreaseEnabled
-          ? 'bg-gray-50 border-gray-200'
-          : 'bg-gray-100 border-gray-200'
-      }`}>
-        <div>
-          <p className={`font-semibold text-sm ${rateIncreaseEnabled ? 'text-gray-800' : 'text-gray-500'}`}>
-            Top rate increases
-          </p>
-          <p className="text-xs text-gray-400 mt-0.5">
-            35% → 41%, 37% → 43%
-          </p>
-        </div>
-        <button
-          onClick={() => setRateIncreaseEnabled(!rateIncreaseEnabled)}
-          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-            rateIncreaseEnabled ? 'bg-primary-500' : 'bg-gray-300'
-          } cursor-pointer`}
-        >
-          <span
-            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-              rateIncreaseEnabled ? 'translate-x-6' : 'translate-x-1'
-            }`}
-          />
-        </button>
-      </div>
+      <RateIncreaseToggle
+        enabled={rateIncreaseEnabled}
+        onToggle={onToggleRateIncrease}
+      />
 
       {/* Year selector */}
       <div>

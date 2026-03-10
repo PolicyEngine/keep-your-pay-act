@@ -2,6 +2,15 @@ import { useQuery } from "@tanstack/react-query";
 import parseCSV from "@/lib/parseCSV";
 import { AggregateImpactResponse, IntraDecileAll, IntraDecileDeciles } from "@/lib/types";
 
+const VARIANTS = {
+  WITH_RATES: "reform",
+  WITHOUT_RATES: "reform_no_rates",
+} as const;
+
+function getVariant(rateIncreaseEnabled: boolean) {
+  return rateIncreaseEnabled ? VARIANTS.WITH_RATES : VARIANTS.WITHOUT_RATES;
+}
+
 async function fetchCSV(filename: string): Promise<Record<string, string | number>[]> {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const res = await fetch(`${basePath}/data/${filename}`);
@@ -113,7 +122,7 @@ export function useAggregateImpact(
   year: number = 2026,
   rateIncreaseEnabled: boolean = true
 ) {
-  const variant = rateIncreaseEnabled ? "reform" : "reform_no_rates";
+  const variant = getVariant(rateIncreaseEnabled);
   return useQuery<AggregateImpactResponse>({
     queryKey: ["aggregateImpact", variant, year],
     queryFn: () => buildAggregateResponse(variant, year),
@@ -124,7 +133,7 @@ export function useAggregateImpact(
 }
 
 export function useTenYearTotal(enabled: boolean, rateIncreaseEnabled: boolean = true) {
-  const variant = rateIncreaseEnabled ? "reform" : "reform_no_rates";
+  const variant = getVariant(rateIncreaseEnabled);
   return useQuery<number>({
     queryKey: ["tenYearTotal", variant],
     queryFn: async () => {

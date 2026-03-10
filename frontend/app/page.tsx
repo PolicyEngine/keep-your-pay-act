@@ -4,6 +4,7 @@ import { useState } from 'react';
 import ImpactAnalysis from '@/components/ImpactAnalysis';
 import AggregateImpact from '@/components/AggregateImpact';
 import PolicyOverview from '@/components/PolicyOverview';
+import RateIncreaseToggle from '@/components/RateIncreaseToggle';
 import type { HouseholdRequest } from '@/lib/types';
 
 const US_STATES = [
@@ -286,34 +287,12 @@ function HouseholdImpactTab() {
             </select>
           </div>
 
-          {/* Top rate increase toggle */}
-          <div className={`flex items-center justify-between p-3 rounded-lg border ${
-            false /* TODO: enable when microsim ready */
-              ? 'bg-gray-50 border-gray-200'
-              : 'bg-gray-100 border-gray-200 opacity-60'
-          }`}>
-            <div>
-              <p className={`font-semibold text-sm ${false ? 'text-gray-800' : 'text-gray-500'}`}>
-                Top rate increases
-              </p>
-              <p className="text-xs text-gray-400 mt-0.5">
-                35% → 41%, 37% → 43% (coming soon)
-              </p>
-            </div>
-            <button
-              onClick={() => setRateIncreaseEnabled(!rateIncreaseEnabled)}
-              disabled={true /* TODO: enable when microsim ready */}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                rateIncreaseEnabled ? 'bg-gray-400' : 'bg-gray-300'
-              } cursor-not-allowed`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  rateIncreaseEnabled ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-          </div>
+          {/* Top rate increase toggle — disabled for household calc until API supports it */}
+          <RateIncreaseToggle
+            enabled={rateIncreaseEnabled}
+            onToggle={setRateIncreaseEnabled}
+            disabled
+          />
         </div>
 
         {/* Calculate button */}
@@ -367,7 +346,7 @@ function NationalImpactTab() {
       <AggregateImpact
         triggered={true}
         rateIncreaseEnabled={rateIncreaseEnabled}
-        setRateIncreaseEnabled={setRateIncreaseEnabled}
+        onToggleRateIncrease={setRateIncreaseEnabled}
       />
     </div>
   );
