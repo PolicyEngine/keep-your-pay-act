@@ -2,15 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import parseCSV from "@/lib/parseCSV";
 import { AggregateImpactResponse, IntraDecileAll, IntraDecileDeciles } from "@/lib/types";
 
-const VARIANTS = {
-  WITH_RATES: "reform",
-  WITHOUT_RATES: "reform_no_rates",
-} as const;
-
-function getVariant(rateIncreaseEnabled: boolean) {
-  return rateIncreaseEnabled ? VARIANTS.WITH_RATES : VARIANTS.WITHOUT_RATES;
-}
-
 async function fetchCSV(filename: string): Promise<Record<string, string | number>[]> {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const res = await fetch(`${basePath}/data/${filename}`);
@@ -19,18 +10,18 @@ async function fetchCSV(filename: string): Promise<Record<string, string | numbe
   return parseCSV(text);
 }
 
-function buildAggregateResponse(variant: string, year: number): Promise<AggregateImpactResponse> {
+function buildAggregateResponse(year: number): Promise<AggregateImpactResponse> {
   return Promise.all([
     fetchCSV("distributional_impact.csv"),
     fetchCSV("metrics.csv"),
     fetchCSV("winners_losers.csv"),
     fetchCSV("income_brackets.csv"),
   ]).then(([distributional, metrics, winnersLosers, incomeBrackets]) => {
-    // Filter by variant and year
-    const dist = distributional.filter((r) => r.variant === variant && r.year === year);
-    const met = metrics.filter((r) => r.variant === variant && r.year === year);
-    const wl = winnersLosers.filter((r) => r.variant === variant && r.year === year);
-    const ib = incomeBrackets.filter((r) => r.variant === variant && r.year === year);
+    // Filter by year
+    const dist = distributional.filter((r) => r.year === year);
+    const met = metrics.filter((r) => r.year === year);
+    const wl = winnersLosers.filter((r) => r.year === year);
+    const ib = incomeBrackets.filter((r) => r.year === year);
 
     // Build metrics lookup
     const m = Object.fromEntries(met.map((r) => [r.metric, r.value as number]));
@@ -120,28 +111,25 @@ function buildAggregateResponse(variant: string, year: number): Promise<Aggregat
 export function useAggregateImpact(
   enabled: boolean,
   year: number = 2026,
-  rateIncreaseEnabled: boolean = true
 ) {
-  const variant = getVariant(rateIncreaseEnabled);
   return useQuery<AggregateImpactResponse>({
-    queryKey: ["aggregateImpact", variant, year],
-    queryFn: () => buildAggregateResponse(variant, year),
+    queryKey: ["aggregateImpact", year],
+    queryFn: () => buildAggregateResponse(year),
     enabled,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
   });
 }
 
-export function useTenYearTotal(enabled: boolean, rateIncreaseEnabled: boolean = true) {
-  const variant = getVariant(rateIncreaseEnabled);
+export function useTenYearTotal(enabled: boolean) {
   return useQuery<number>({
-    queryKey: ["tenYearTotal", variant],
+    queryKey: ["tenYearTotal"],
     queryFn: async () => {
       const rows = await fetchCSV("metrics.csv");
       const years = Array.from({ length: 10 }, (_, i) => 2026 + i);
       return years.reduce((sum, year) => {
         const row = rows.find(
-          (r) => r.variant === variant && r.year === year && r.metric === "budgetary_impact"
+          (r) => r.year === year && r.metric === "budgetary_impact"
         );
         return sum + (row ? (row.value as number) : 0);
       }, 0);

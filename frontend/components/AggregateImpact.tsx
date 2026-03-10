@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useAggregateImpact, useTenYearTotal } from '@/hooks/useAggregateImpact';
-import RateIncreaseToggle from '@/components/RateIncreaseToggle';
 import {
   BarChart,
   Bar,
@@ -63,14 +62,12 @@ function CustomTooltip({ active, payload, label, formatter }: {
 
 interface Props {
   triggered: boolean;
-  rateIncreaseEnabled: boolean;
-  onToggleRateIncrease: (v: boolean) => void;
 }
 
-export default function AggregateImpact({ triggered, rateIncreaseEnabled, onToggleRateIncrease }: Props) {
+export default function AggregateImpact({ triggered }: Props) {
   const [selectedYear, setSelectedYear] = useState(2026);
-  const { data, isLoading, error } = useAggregateImpact(triggered, selectedYear, rateIncreaseEnabled);
-  const { data: tenYearTotal } = useTenYearTotal(triggered, rateIncreaseEnabled);
+  const { data, isLoading, error } = useAggregateImpact(triggered, selectedYear);
+  const { data: tenYearTotal } = useTenYearTotal(triggered);
   const [activeSection, setActiveSection] = useState<'fiscal' | 'distributional' | 'winners' | 'poverty'>('fiscal');
   const [distMode, setDistMode] = useState<'relative' | 'absolute'>('relative');
 
@@ -128,11 +125,6 @@ export default function AggregateImpact({ triggered, rateIncreaseEnabled, onTogg
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-primary">National impact analysis</h2>
-
-      <RateIncreaseToggle
-        enabled={rateIncreaseEnabled}
-        onToggle={onToggleRateIncrease}
-      />
 
       {/* Year selector */}
       <div>

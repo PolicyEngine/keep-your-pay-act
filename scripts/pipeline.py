@@ -59,18 +59,10 @@ def _load_existing(output_dir: str) -> dict[str, pd.DataFrame]:
 
 
 def _completed_years(existing: dict[str, pd.DataFrame]) -> set[int]:
-    """Find years that have data for all variants in all CSVs."""
+    """Find years that already have data in all CSVs."""
     if existing["metrics"].empty:
         return set()
-    df = existing["metrics"]
-    # A year is complete if it has both "reform" and "reform_no_rates" variants
-    completed = set()
-    for year in YEARS:
-        year_data = df[df["year"] == year]
-        variants = set(year_data["variant"].unique())
-        if {"reform", "reform_no_rates"}.issubset(variants):
-            completed.add(year)
-    return completed
+    return set(existing["metrics"]["year"].unique()) & set(YEARS)
 
 
 def _append_rows(
@@ -98,12 +90,11 @@ def _flush_pending(
         pending[name].clear()
 
 
-def _extract_distributional(result: dict, variant: str, year: int) -> list[dict]:
+def _extract_distributional(result: dict, year: int) -> list[dict]:
     rows = []
     for decile, avg in result["decile"]["average"].items():
         rows.append({
             "year": year,
-            "variant": variant,
             "decile": decile,
             "average_change": round(avg, 2),
             "relative_change": round(result["decile"]["relative"][decile], 6),
@@ -111,7 +102,7 @@ def _extract_distributional(result: dict, variant: str, year: int) -> list[dict]
     return rows
 
 
-def _extract_metrics(result: dict, variant: str, year: int) -> list[dict]:
+def _extract_metrics(result: dict, year: int) -> list[dict]:
     metrics = [
         ("budgetary_impact", result["budget"]["budgetary_impact"]),
         ("tax_revenue_impact", result["budget"]["tax_revenue_impact"]),
@@ -142,16 +133,15 @@ def _extract_metrics(result: dict, variant: str, year: int) -> list[dict]:
         ("deep_child_poverty_rate_change", result["deep_child_poverty_rate_change"]),
         ("deep_child_poverty_percent_change", result["deep_child_poverty_percent_change"]),
     ]
-    return [{"year": year, "variant": variant, "metric": k, "value": v} for k, v in metrics]
+    return [{"year": year, "metric": k, "value": v} for k, v in metrics]
 
 
-def _extract_winners_losers(result: dict, variant: str, year: int) -> list[dict]:
+def _extract_winners_losers(result: dict, year: int) -> list[dict]:
     intra = result["intra_decile"]
     rows = []
 
     rows.append({
         "year": year,
-        "variant": variant,
         "decile": "All",
         "gain_more_5pct": intra["all"]["Gain more than 5%"],
         "gain_less_5pct": intra["all"]["Gain less than 5%"],
@@ -163,7 +153,6 @@ def _extract_winners_losers(result: dict, variant: str, year: int) -> list[dict]
     for i in range(10):
         rows.append({
             "year": year,
-            "variant": variant,
             "decile": str(i + 1),
             "gain_more_5pct": intra["deciles"]["Gain more than 5%"][i],
             "gain_less_5pct": intra["deciles"]["Gain less than 5%"][i],
@@ -175,11 +164,10 @@ def _extract_winners_losers(result: dict, variant: str, year: int) -> list[dict]
     return rows
 
 
-def _extract_income_brackets(result: dict, variant: str, year: int) -> list[dict]:
+def _extract_income_brackets(result: dict, year: int) -> list[dict]:
     return [
         {
             "year": year,
-            "variant": variant,
             "bracket": b["bracket"],
             "beneficiaries": b["beneficiaries"],
             "total_cost": b["total_cost"],
@@ -234,17 +222,16 @@ def generate_all_data(output_dir: str = None, fresh: bool = False) -> dict[str, 
     for i, year in enumerate(remaining):
         print(f"\n[{i + 1}/{len(remaining)}] Year {year}...")
 
-        year_results = _run_year_subprocess(year)
+        result = _run_year_subprocess(year)
 
-        for variant, result in year_results.items():
-            _append_rows(pending, "distributional_impact",
-                         _extract_distributional(result, variant, year))
-            _append_rows(pending, "metrics",
-                         _extract_metrics(result, variant, year))
-            _append_rows(pending, "winners_losers",
-                         _extract_winners_losers(result, variant, year))
-            _append_rows(pending, "income_brackets",
-                         _extract_income_brackets(result, variant, year))
+        _append_rows(pending, "distributional_impact",
+                     _extract_distributional(result, year))
+        _append_rows(pending, "metrics",
+                     _extract_metrics(result, year))
+        _append_rows(pending, "winners_losers",
+                     _extract_winners_losers(result, year))
+        _append_rows(pending, "income_brackets",
+                     _extract_income_brackets(result, year))
 
         # Flush pending rows and save all CSVs after each year
         _flush_pending(existing, pending)

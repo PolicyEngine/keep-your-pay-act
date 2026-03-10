@@ -36,8 +36,8 @@ def _poverty_metrics(baseline_rate, reform_rate):
     return rate_change, percent_change
 
 
-def calculate_aggregate_impact(year: int = 2026, rate_increase_enabled: bool = True) -> dict:
-    reform = create_reform(year=year, rate_increase_enabled=rate_increase_enabled)
+def calculate_aggregate_impact(year: int = 2026) -> dict:
+    reform = create_reform(year=year)
 
     sim_baseline = Microsimulation()
     sim_reform = Microsimulation(reform=reform)

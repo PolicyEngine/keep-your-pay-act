@@ -144,10 +144,7 @@ POLICY_JSON = {
     "gov.contrib.congress.afa.ctc.phase_out.threshold.lower.HEAD_OF_HOUSEHOLD": {
         "2026-01-01.2026-12-31": 112500,
     },
-}
-
-# Top income tax rate increases: 35% → 41%, 37% → 43%
-TOP_RATE_INCREASE_JSON = {
+    # Top income tax rate increases: 35% → 41%, 37% → 43%
     "gov.irs.income.bracket.rates.6": {
         "2026-01-01.2100-12-31": 0.41,
     },
@@ -157,18 +154,13 @@ TOP_RATE_INCREASE_JSON = {
 }
 
 
-def create_reform(year: int = 2026, rate_increase_enabled: bool = True):
+def create_reform(year: int = 2026):
     """Create the Keep Your Pay Act reform for the given year.
 
     Args:
         year: Tax year (unused — reform dict covers 2026-2035).
-        rate_increase_enabled: Whether to include the top rate increases
-            (35% → 41%, 37% → 43%). Defaults to True.
 
     Returns a Reform object built from the full policy JSON via
     Reform.from_dict.
     """
-    policy = POLICY_JSON.copy()
-    if rate_increase_enabled:
-        policy.update(TOP_RATE_INCREASE_JSON)
-    return Reform.from_dict(policy, country_id="us")
+    return Reform.from_dict(POLICY_JSON, country_id="us")

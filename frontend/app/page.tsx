@@ -4,7 +4,6 @@ import { useState } from 'react';
 import ImpactAnalysis from '@/components/ImpactAnalysis';
 import AggregateImpact from '@/components/AggregateImpact';
 import PolicyOverview from '@/components/PolicyOverview';
-import RateIncreaseToggle from '@/components/RateIncreaseToggle';
 import type { HouseholdRequest } from '@/lib/types';
 
 const US_STATES = [
@@ -100,7 +99,6 @@ function HouseholdImpactTab() {
   const [income, setIncome] = useState(75000);
   const [stateCode, setStateCode] = useState('CA');
   const [maxEarnings, setMaxEarnings] = useState(500000);
-  const [rateIncreaseEnabled, setRateIncreaseEnabled] = useState(true);
   const [triggered, setTriggered] = useState(false);
   const [submittedRequest, setSubmittedRequest] = useState<HouseholdRequest | null>(null);
 
@@ -134,7 +132,6 @@ function HouseholdImpactTab() {
     year: 2026,
     max_earnings: maxEarnings,
     state_code: stateCode,
-    reform_params: { rate_increase_enabled: rateIncreaseEnabled },
   });
 
   const handleCalculate = () => {
@@ -287,12 +284,6 @@ function HouseholdImpactTab() {
             </select>
           </div>
 
-          {/* Top rate increase toggle — disabled for household calc until API supports it */}
-          <RateIncreaseToggle
-            enabled={rateIncreaseEnabled}
-            onToggle={setRateIncreaseEnabled}
-            disabled
-          />
         </div>
 
         {/* Calculate button */}
@@ -339,15 +330,9 @@ function HouseholdImpactTab() {
 
 /** National impact tab */
 function NationalImpactTab() {
-  const [rateIncreaseEnabled, setRateIncreaseEnabled] = useState(true);
-
   return (
     <div className="space-y-6">
-      <AggregateImpact
-        triggered={true}
-        rateIncreaseEnabled={rateIncreaseEnabled}
-        onToggleRateIncrease={setRateIncreaseEnabled}
-      />
+      <AggregateImpact triggered={true} />
     </div>
   );
 }
