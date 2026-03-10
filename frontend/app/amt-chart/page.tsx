@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
+import ChartWatermark from '@/components/ChartWatermark';
 
 // Data from PolicyEngine US model: MFJ couple, single earner, TX, standard deduction only, 2026
 // KYPA reform: MFJ standard deduction $32,200 → $75,000
@@ -130,59 +131,61 @@ export default function AmtChartPage() {
       >
         Married filing jointly, standard deduction only, Texas, 2026
       </p>
-      <ResponsiveContainer width="100%" height={400}>
-        <AreaChart data={data} margin={{ top: 10, right: 20, bottom: 30, left: 60 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-          <XAxis
-            dataKey="income"
-            type="number"
-            domain={[0, 'dataMax']}
-            tickFormatter={formatIncome}
-            tick={{ fontFamily: 'Inter, sans-serif', fontSize: 12 }}
-            ticks={[0, 200000, 400000, 600000, 800000, 1000000]}
-            label={{
-              value: 'Household income',
-              position: 'insideBottom',
-              offset: -20,
-              style: { fontFamily: 'Inter, sans-serif', fontSize: 13 },
-            }}
-          />
-          <YAxis
-            tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}k`}
-            tick={{ fontFamily: 'Inter, sans-serif', fontSize: 12 }}
-            label={{
-              value: 'Tax savings',
-              angle: -90,
-              position: 'insideLeft',
-              offset: -45,
-              style: { fontFamily: 'Inter, sans-serif', fontSize: 13 },
-            }}
-          />
-          <Tooltip content={<CustomTooltip />} />
-          <Legend
-            verticalAlign="top"
-            wrapperStyle={{ fontFamily: 'Inter, sans-serif', fontSize: 12 }}
-          />
-          <Area
-            type="monotone"
-            dataKey="bracket"
-            name="Bracket savings (no AMT)"
-            stroke={TEAL}
-            fill={TEAL}
-            fillOpacity={0.15}
-            strokeWidth={2}
-          />
-          <Area
-            type="monotone"
-            dataKey="actual"
-            name="Actual savings (with AMT)"
-            stroke={GRAY}
-            fill={GRAY}
-            fillOpacity={0.15}
-            strokeWidth={2}
-          />
-        </AreaChart>
-      </ResponsiveContainer>
+      <ChartWatermark>
+        <ResponsiveContainer width="100%" height={400}>
+          <AreaChart data={data} margin={{ top: 10, right: 20, bottom: 30, left: 60 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+            <XAxis
+              dataKey="income"
+              type="number"
+              domain={[0, 'dataMax']}
+              tickFormatter={formatIncome}
+              tick={{ fontFamily: 'Inter, sans-serif', fontSize: 12 }}
+              ticks={[0, 200000, 400000, 600000, 800000, 1000000]}
+              label={{
+                value: 'Household income',
+                position: 'insideBottom',
+                offset: -20,
+                style: { fontFamily: 'Inter, sans-serif', fontSize: 13 },
+              }}
+            />
+            <YAxis
+              tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}k`}
+              tick={{ fontFamily: 'Inter, sans-serif', fontSize: 12 }}
+              label={{
+                value: 'Tax savings',
+                angle: -90,
+                position: 'insideLeft',
+                offset: -45,
+                style: { fontFamily: 'Inter, sans-serif', fontSize: 13 },
+              }}
+            />
+            <Tooltip content={<CustomTooltip />} />
+            <Legend
+              verticalAlign="top"
+              wrapperStyle={{ fontFamily: 'Inter, sans-serif', fontSize: 12 }}
+            />
+            <Area
+              type="monotone"
+              dataKey="bracket"
+              name="Bracket savings (no AMT)"
+              stroke={TEAL}
+              fill={TEAL}
+              fillOpacity={0.15}
+              strokeWidth={2}
+            />
+            <Area
+              type="monotone"
+              dataKey="actual"
+              name="Actual savings (with AMT)"
+              stroke={GRAY}
+              fill={GRAY}
+              fillOpacity={0.15}
+              strokeWidth={2}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </ChartWatermark>
     </div>
   );
 }
