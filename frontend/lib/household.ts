@@ -222,6 +222,13 @@ export function buildReformPolicy(): Record<string, Record<string, any>> {
     "gov.contrib.congress.afa.ctc.phase_out.threshold.lower.HEAD_OF_HOUSEHOLD": {
       "2026-01-01.2026-12-31": 112500,
     },
+    // Top income tax rate increases: 35% → 41%, 37% → 43%
+    "gov.irs.income.bracket.rates.6": {
+      "2026-01-01.2100-12-31": 0.41,
+    },
+    "gov.irs.income.bracket.rates.7": {
+      "2026-01-01.2100-12-31": 0.43,
+    },
   };
 }
 
