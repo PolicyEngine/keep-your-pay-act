@@ -131,8 +131,7 @@ export default function AmtChartPage() {
       >
         Married filing jointly, standard deduction only, Texas, 2026
       </p>
-      <ChartWatermark>
-        <ResponsiveContainer width="100%" height={400}>
+      <ResponsiveContainer width="100%" height={400}>
           <AreaChart data={data} margin={{ top: 10, right: 20, bottom: 30, left: 60 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
             <XAxis
@@ -185,7 +184,7 @@ export default function AmtChartPage() {
             />
           </AreaChart>
         </ResponsiveContainer>
-      </ChartWatermark>
+      <ChartWatermark />
     </div>
   );
 }

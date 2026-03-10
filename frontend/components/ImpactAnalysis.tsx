@@ -109,8 +109,7 @@ export default function ImpactAnalysis({ request, triggered, maxEarnings }: Prop
         <h3 className="text-lg font-semibold mb-4 text-gray-800">
           Change in net income by employment income ({request?.year ?? 2026})
         </h3>
-        <ChartWatermark>
-          <ResponsiveContainer width="100%" height={400}>
+        <ResponsiveContainer width="100%" height={400}>
             <LineChart data={chartData} margin={{ left: 20, right: 20, top: 5, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
               <XAxis
@@ -138,7 +137,7 @@ export default function ImpactAnalysis({ request, triggered, maxEarnings }: Prop
               />
             </LineChart>
           </ResponsiveContainer>
-        </ChartWatermark>
+        <ChartWatermark />
       </div>
     </div>
   );

@@ -279,8 +279,7 @@ export default function AggregateImpact({ triggered }: Props) {
                 ? 'Change in household net income as a percentage of baseline income, by decile.'
                 : 'Average change in household net income in dollars, by decile.'}
             </p>
-            <ChartWatermark>
-              <ResponsiveContainer width="100%" height={400}>
+            <ResponsiveContainer width="100%" height={400}>
                 <BarChart data={chartData} margin={CHART_MARGIN}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                   <XAxis dataKey="decile" tick={TICK_STYLE} stroke="#A0AEC0" label={{ value: 'Income decile', position: 'insideBottom', offset: -15, style: { ...TICK_STYLE, fill: '#718096' } }} />
@@ -307,7 +306,7 @@ export default function AggregateImpact({ triggered }: Props) {
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
-            </ChartWatermark>
+            <ChartWatermark />
           </div>
         );
       })()}
@@ -363,8 +362,7 @@ export default function AggregateImpact({ triggered }: Props) {
             <div>
               <h3 className="text-lg font-semibold text-gray-800 mb-3">Winners & losers by income decile</h3>
               <div className="bg-white border rounded-lg p-6">
-                <ChartWatermark>
-                  <ResponsiveContainer width="100%" height={400}>
+                <ResponsiveContainer width="100%" height={400}>
                     <BarChart data={stackedData} layout="vertical" stackOffset="expand" barSize={24} margin={CHART_MARGIN}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                       <XAxis type="number" tickFormatter={(v: number) => `${(v * 100).toFixed(0)}%`} tick={TICK_STYLE} stroke="#A0AEC0" />
@@ -375,7 +373,7 @@ export default function AggregateImpact({ triggered }: Props) {
                       ))}
                     </BarChart>
                   </ResponsiveContainer>
-                </ChartWatermark>
+                <ChartWatermark />
                 {/* Custom legend */}
                 <div className="flex flex-wrap justify-center gap-4 mt-4">
                   {categories.map((c) => (
@@ -446,8 +444,7 @@ export default function AggregateImpact({ triggered }: Props) {
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-semibold text-gray-800 mb-3">Change in poverty rates (%)</h3>
-              <ChartWatermark>
-                <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={chartData} margin={CHART_MARGIN}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                     <XAxis dataKey="label" tick={TICK_STYLE} stroke="#A0AEC0" />
@@ -461,7 +458,7 @@ export default function AggregateImpact({ triggered }: Props) {
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
-              </ChartWatermark>
+              <ChartWatermark />
             </div>
           </div>
         );
