@@ -128,30 +128,25 @@ export default function AggregateImpact({ triggered, rateIncreaseEnabled, setRat
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-primary">National impact analysis</h2>
 
-      <p className="text-sm text-gray-500 bg-gray-50 rounded-lg px-4 py-3 border border-gray-200">
-        These estimates are static: they do not capture behavioral responses such as changes in labor supply, tax avoidance, or migration.
-      </p>
-
       {/* Top rate increase toggle */}
       <div className={`flex items-center justify-between p-3 rounded-lg border ${
-        false /* TODO: enable when microsim ready */
+        rateIncreaseEnabled
           ? 'bg-gray-50 border-gray-200'
-          : 'bg-gray-100 border-gray-200 opacity-60'
+          : 'bg-gray-100 border-gray-200'
       }`}>
         <div>
-          <p className={`font-semibold text-sm ${false ? 'text-gray-800' : 'text-gray-500'}`}>
+          <p className={`font-semibold text-sm ${rateIncreaseEnabled ? 'text-gray-800' : 'text-gray-500'}`}>
             Top rate increases
           </p>
           <p className="text-xs text-gray-400 mt-0.5">
-            35% → 41%, 37% → 43% (coming soon)
+            35% → 41%, 37% → 43%
           </p>
         </div>
         <button
           onClick={() => setRateIncreaseEnabled(!rateIncreaseEnabled)}
-          disabled={true /* TODO: enable when microsim ready */}
           className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-            rateIncreaseEnabled ? 'bg-gray-400' : 'bg-gray-300'
-          } cursor-not-allowed`}
+            rateIncreaseEnabled ? 'bg-primary-500' : 'bg-gray-300'
+          } cursor-pointer`}
         >
           <span
             className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -474,6 +469,10 @@ export default function AggregateImpact({ triggered, rateIncreaseEnabled, setRat
           </div>
         );
       })()}
+
+      <p className="text-sm text-gray-500 bg-gray-50 rounded-lg px-4 py-3 border border-gray-200">
+        These estimates are static: they do not capture behavioral responses such as changes in labor supply, tax avoidance, or migration.
+      </p>
     </div>
   );
 }
