@@ -17,7 +17,7 @@ export default function ChartWatermark({ children }: { children: React.ReactNode
       {children}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="https://policyengine.org/assets/logos/policyengine/blue.png"
+        src="/policyengine-logo-blue.png"
         alt=""
         aria-hidden="true"
         style={{
