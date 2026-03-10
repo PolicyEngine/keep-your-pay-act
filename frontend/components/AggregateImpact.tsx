@@ -425,7 +425,7 @@ export default function AggregateImpact({ triggered }: Props) {
                 <BarChart data={chartData} margin={CHART_MARGIN}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                   <XAxis dataKey="label" tick={TICK_STYLE} stroke="#A0AEC0" />
-                  <YAxis tickFormatter={(v: number) => `${v >= 0 ? '+' : ''}${v.toFixed(1)}%`} tick={TICK_STYLE} stroke="#A0AEC0" width={70} allowDecimals={false} />
+                  <YAxis domain={[Math.min(0, ...chartData.map(d => d.pctChange)) * 1.15, Math.max(0, ...chartData.map(d => d.pctChange)) * 1.15 || 5]} tickFormatter={(v: number) => `${v >= 0 ? '+' : ''}${v.toFixed(1)}%`} tick={TICK_STYLE} stroke="#A0AEC0" width={70} allowDecimals={false} />
                   <Tooltip content={<CustomTooltip formatter={(v) => `${v >= 0 ? '+' : ''}${v.toFixed(1)}%`} />} />
                   <ReferenceLine y={0} stroke="#A0AEC0" strokeWidth={1} />
                   <Bar dataKey="pctChange" name="Change (%)" radius={[2, 2, 0, 0]}>
