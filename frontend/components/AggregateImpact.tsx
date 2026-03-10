@@ -68,8 +68,8 @@ interface Props {
 
 export default function AggregateImpact({ triggered, rateIncreaseEnabled, setRateIncreaseEnabled }: Props) {
   const [selectedYear, setSelectedYear] = useState(2026);
-  const { data, isLoading, error } = useAggregateImpact(triggered, selectedYear);
-  const { data: tenYearTotal } = useTenYearTotal(triggered);
+  const { data, isLoading, error } = useAggregateImpact(triggered, selectedYear, rateIncreaseEnabled);
+  const { data: tenYearTotal } = useTenYearTotal(triggered, rateIncreaseEnabled);
   const [activeSection, setActiveSection] = useState<'fiscal' | 'distributional' | 'winners' | 'poverty'>('fiscal');
   const [distMode, setDistMode] = useState<'relative' | 'absolute'>('relative');
 

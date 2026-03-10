@@ -34,10 +34,18 @@ def main():
     year = int(sys.argv[1])
     from kypa_calc.microsimulation import calculate_aggregate_impact
 
-    print(f"  Computing reform {year}...", file=sys.stderr)
-    result = calculate_aggregate_impact(year=year)
-    results = {"reform": _convert_for_json(result)}
-    print(f"  Done: reform {year}", file=sys.stderr)
+    print(f"  Computing reform (with rate increases) {year}...", file=sys.stderr)
+    result_with = calculate_aggregate_impact(year=year, rate_increase_enabled=True)
+    print(f"  Done: reform (with rate increases) {year}", file=sys.stderr)
+
+    print(f"  Computing reform (without rate increases) {year}...", file=sys.stderr)
+    result_without = calculate_aggregate_impact(year=year, rate_increase_enabled=False)
+    print(f"  Done: reform (without rate increases) {year}", file=sys.stderr)
+
+    results = {
+        "reform": _convert_for_json(result_with),
+        "reform_no_rates": _convert_for_json(result_without),
+    }
 
     json.dump(results, sys.stdout)
 

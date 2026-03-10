@@ -110,9 +110,10 @@ function buildAggregateResponse(variant: string, year: number): Promise<Aggregat
 
 export function useAggregateImpact(
   enabled: boolean,
-  year: number = 2026
+  year: number = 2026,
+  rateIncreaseEnabled: boolean = true
 ) {
-  const variant = "reform";
+  const variant = rateIncreaseEnabled ? "reform" : "reform_no_rates";
   return useQuery<AggregateImpactResponse>({
     queryKey: ["aggregateImpact", variant, year],
     queryFn: () => buildAggregateResponse(variant, year),
@@ -122,15 +123,16 @@ export function useAggregateImpact(
   });
 }
 
-export function useTenYearTotal(enabled: boolean) {
+export function useTenYearTotal(enabled: boolean, rateIncreaseEnabled: boolean = true) {
+  const variant = rateIncreaseEnabled ? "reform" : "reform_no_rates";
   return useQuery<number>({
-    queryKey: ["tenYearTotal"],
+    queryKey: ["tenYearTotal", variant],
     queryFn: async () => {
       const rows = await fetchCSV("metrics.csv");
       const years = Array.from({ length: 10 }, (_, i) => 2026 + i);
       return years.reduce((sum, year) => {
         const row = rows.find(
-          (r) => r.variant === "reform" && r.year === year && r.metric === "budgetary_impact"
+          (r) => r.variant === variant && r.year === year && r.metric === "budgetary_impact"
         );
         return sum + (row ? (row.value as number) : 0);
       }, 0);
