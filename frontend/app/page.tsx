@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import ImpactAnalysis from '@/components/ImpactAnalysis';
 import AggregateImpact from '@/components/AggregateImpact';
+import StateImpact from '@/components/StateImpact';
 import PolicyOverview from '@/components/PolicyOverview';
 import type { HouseholdRequest } from '@/lib/types';
 
@@ -27,12 +28,13 @@ const US_STATES = [
 ];
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<'policy' | 'impact' | 'aggregate'>('policy');
+  const [activeTab, setActiveTab] = useState<'policy' | 'impact' | 'aggregate' | 'state'>('policy');
 
   const TAB_CONFIG = [
     { id: 'policy' as const, label: 'Policy overview' },
     { id: 'impact' as const, label: 'Household impact' },
     { id: 'aggregate' as const, label: 'National impact' },
+    { id: 'state' as const, label: 'State interactions' },
   ];
 
   return (
@@ -80,8 +82,10 @@ export default function Home() {
             <PolicyOverview />
           ) : activeTab === 'impact' ? (
             <HouseholdImpactTab />
-          ) : (
+          ) : activeTab === 'aggregate' ? (
             <NationalImpactTab />
+          ) : (
+            <StateImpactTab />
           )}
         </div>
       </div>
@@ -333,6 +337,15 @@ function NationalImpactTab() {
   return (
     <div className="space-y-6">
       <AggregateImpact triggered={true} />
+    </div>
+  );
+}
+
+/** State interactions tab */
+function StateImpactTab() {
+  return (
+    <div className="space-y-6">
+      <StateImpact triggered={true} />
     </div>
   );
 }
