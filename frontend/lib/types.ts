@@ -1,7 +1,3 @@
-export interface ReformParams {
-  // Keep Your Pay Act uses a single reform variant — no toggles needed
-}
-
 export interface HouseholdRequest {
   age_head: number;
   age_spouse: number | null;
@@ -10,7 +6,6 @@ export interface HouseholdRequest {
   year: number;
   max_earnings: number;
   state_code: string;
-  reform_params: ReformParams;
 }
 
 export interface BenefitAtIncome {

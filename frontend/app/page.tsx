@@ -132,7 +132,6 @@ function HouseholdImpactTab() {
     year: 2026,
     max_earnings: maxEarnings,
     state_code: stateCode,
-    reform_params: {},
   });
 
   const handleCalculate = () => {
@@ -284,6 +283,7 @@ function HouseholdImpactTab() {
               ))}
             </select>
           </div>
+
         </div>
 
         {/* Calculate button */}

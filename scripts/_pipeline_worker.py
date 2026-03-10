@@ -36,10 +36,9 @@ def main():
 
     print(f"  Computing reform {year}...", file=sys.stderr)
     result = calculate_aggregate_impact(year=year)
-    results = {"reform": _convert_for_json(result)}
     print(f"  Done: reform {year}", file=sys.stderr)
 
-    json.dump(results, sys.stdout)
+    json.dump(_convert_for_json(result), sys.stdout)
 
 
 if __name__ == "__main__":
