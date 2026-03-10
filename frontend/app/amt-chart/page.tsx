@@ -54,11 +54,6 @@ const data = [
 const TEAL = '#319795';
 const GRAY = '#718096';
 
-function formatDollar(value: number) {
-  if (value >= 1000) return `$${(value / 1000).toFixed(0)}k`;
-  return `$${value}`;
-}
-
 function formatIncome(value: number) {
   if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
   if (value >= 1000) return `$${(value / 1000).toFixed(0)}k`;
@@ -114,24 +109,11 @@ export default function AmtChartPage() {
         width: '100%',
         maxWidth: 900,
         margin: '0 auto',
-        padding: 24,
+        padding: '16px 24px',
         fontFamily: 'Inter, sans-serif',
       }}
     >
-      <h2 style={{ fontSize: 18, fontWeight: 600, textAlign: 'center', margin: '0 0 4px' }}>
-        KYPA tax savings with and without AMT
-      </h2>
-      <p
-        style={{
-          fontSize: 13,
-          color: '#718096',
-          textAlign: 'center',
-          margin: '0 0 16px',
-        }}
-      >
-        Married filing jointly, standard deduction only, Texas, 2026
-      </p>
-      <ResponsiveContainer width="100%" height={400}>
+      <ResponsiveContainer width="100%" height={420}>
           <AreaChart data={data} margin={{ top: 10, right: 20, bottom: 30, left: 60 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
             <XAxis
