@@ -9,14 +9,15 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
+  ReferenceLine,
 } from 'recharts';
 import ChartWatermark from '@/components/ChartWatermark';
 
-// Data from PolicyEngine US model: MFJ couple, single earner, TX, standard deduction only, 2026
-// KYPA reform: MFJ standard deduction $32,200 → $75,000
+// Data from PolicyEngine US model: MFJ couple, single earner, TX, 2026
+// Full KYPA reform: standard deduction increase + bracket rate changes (35%→41%, 37%→43%) + AMT
 const data = [
   { income: 0, bracket: 0, actual: 0 },
-  { income: 25000, bracket: 0, actual: 0 },
+  { income: 25000, bracket: 0, actual: 428 },
   { income: 50000, bracket: 1780, actual: 1780 },
   { income: 75000, bracket: 4640, actual: 4640 },
   { income: 100000, bracket: 5136, actual: 5136 },
@@ -37,18 +38,24 @@ const data = [
   { income: 475000, bracket: 13412, actual: 5744 },
   { income: 500000, bracket: 13696, actual: 6744 },
   { income: 525000, bracket: 13696, actual: 7744 },
-  { income: 550000, bracket: 13856, actual: 8904 },
-  { income: 575000, bracket: 14606, actual: 10654 },
-  { income: 600000, bracket: 14980, actual: 12404 },
-  { income: 625000, bracket: 14980, actual: 14154 },
-  { income: 650000, bracket: 14980, actual: 14980 },
-  { income: 675000, bracket: 14980, actual: 14980 },
-  { income: 700000, bracket: 14980, actual: 14980 },
-  { income: 750000, bracket: 14980, actual: 14980 },
-  { income: 800000, bracket: 14980, actual: 14980 },
-  { income: 850000, bracket: 15836, actual: 15836 },
-  { income: 900000, bracket: 15836, actual: 15836 },
-  { income: 1000000, bracket: 15836, actual: 15836 },
+  { income: 550000, bracket: 13857, actual: 8905 },
+  { income: 575000, bracket: 14607, actual: 10655 },
+  { income: 600000, bracket: 14227, actual: 12405 },
+  { income: 625000, bracket: 12727, actual: 12727 },
+  { income: 650000, bracket: 11227, actual: 11227 },
+  { income: 675000, bracket: 9727, actual: 9727 },
+  { income: 700000, bracket: 8227, actual: 8227 },
+  { income: 725000, bracket: 6727, actual: 6727 },
+  { income: 750000, bracket: 5227, actual: 5227 },
+  { income: 775000, bracket: 3727, actual: 3727 },
+  { income: 800000, bracket: 2227, actual: 2227 },
+  { income: 825000, bracket: 1209, actual: 1209 },
+  { income: 850000, bracket: 83, actual: 83 },
+  { income: 875000, bracket: -1417, actual: -1417 },
+  { income: 900000, bracket: -2917, actual: -2917 },
+  { income: 950000, bracket: -5917, actual: -5917 },
+  { income: 1000000, bracket: -8917, actual: -8917 },
+  { income: 1050000, bracket: -11917, actual: -11917 },
 ];
 
 const TEAL = '#319795';
@@ -88,10 +95,10 @@ function CustomTooltip({
         Income: {formatIncome(label)}
       </p>
       <p style={{ margin: 0, color: TEAL }}>
-        Bracket savings: ${bracket.toLocaleString()}
+        Without AMT: {bracket >= 0 ? '$' : '−$'}{Math.abs(bracket).toLocaleString()}
       </p>
       <p style={{ margin: 0, color: GRAY }}>
-        Actual savings: ${actual.toLocaleString()}
+        With AMT: {actual >= 0 ? '$' : '−$'}{Math.abs(actual).toLocaleString()}
       </p>
       {clawback > 0 && (
         <p style={{ margin: 0, color: '#E53E3E' }}>
@@ -131,16 +138,21 @@ export default function AmtChartPage() {
               }}
             />
             <YAxis
-              tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}k`}
+              tickFormatter={(v: number) => {
+                const abs = Math.abs(v);
+                const label = abs >= 1000 ? `$${(abs / 1000).toFixed(0)}k` : `$${abs}`;
+                return v < 0 ? `−${label}` : label;
+              }}
               tick={{ fontFamily: 'Inter, sans-serif', fontSize: 12 }}
               label={{
-                value: 'Tax savings',
+                value: 'Tax savings (negative = tax increase)',
                 angle: -90,
                 position: 'insideLeft',
                 offset: -45,
                 style: { fontFamily: 'Inter, sans-serif', fontSize: 13 },
               }}
             />
+            <ReferenceLine y={0} stroke="#A0AEC0" strokeDasharray="3 3" />
             <Tooltip content={<CustomTooltip />} />
             <Legend
               verticalAlign="top"
@@ -149,7 +161,7 @@ export default function AmtChartPage() {
             <Area
               type="monotone"
               dataKey="bracket"
-              name="Bracket savings (no AMT)"
+              name="Tax savings (no AMT)"
               stroke={TEAL}
               fill={TEAL}
               fillOpacity={0.15}
@@ -158,7 +170,7 @@ export default function AmtChartPage() {
             <Area
               type="monotone"
               dataKey="actual"
-              name="Actual savings (with AMT)"
+              name="Tax savings (with AMT)"
               stroke={GRAY}
               fill={GRAY}
               fillOpacity={0.15}
