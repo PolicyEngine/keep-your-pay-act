@@ -13,6 +13,7 @@ import {
 } from 'recharts';
 import { useHouseholdImpact } from '@/hooks/useHouseholdImpact';
 import type { HouseholdRequest } from '@/lib/types';
+import ChartWatermark from './ChartWatermark';
 
 interface Props {
   request: HouseholdRequest | null;
@@ -109,33 +110,34 @@ export default function ImpactAnalysis({ request, triggered, maxEarnings }: Prop
           Change in net income by employment income ({request?.year ?? 2026})
         </h3>
         <ResponsiveContainer width="100%" height={400}>
-          <LineChart data={chartData} margin={{ left: 20, right: 20, top: 5, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-            <XAxis
-              dataKey="income"
-              type="number"
-              tickFormatter={formatIncome}
-              stroke="#666"
-              domain={[0, xMax]}
-              allowDataOverflow={false}
-            />
-            <YAxis tickFormatter={formatCurrency} stroke="#666" width={80} />
-            <Tooltip
-              formatter={(value: number) => formatCurrency(value)}
-              labelFormatter={(value: number) => `Income: ${formatCurrency(value)}`}
-            />
-            <Legend />
-            <ReferenceLine y={0} stroke="#666" strokeWidth={2} />
-            <Line
-              type="monotone"
-              dataKey="benefit"
-              stroke="#319795"
-              strokeWidth={3}
-              name="Change in Net Income"
-              dot={false}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+            <LineChart data={chartData} margin={{ left: 20, right: 20, top: 5, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+              <XAxis
+                dataKey="income"
+                type="number"
+                tickFormatter={formatIncome}
+                stroke="#666"
+                domain={[0, xMax]}
+                allowDataOverflow={false}
+              />
+              <YAxis tickFormatter={formatCurrency} stroke="#666" width={80} />
+              <Tooltip
+                formatter={(value: number) => formatCurrency(value)}
+                labelFormatter={(value: number) => `Income: ${formatCurrency(value)}`}
+              />
+              <Legend />
+              <ReferenceLine y={0} stroke="#666" strokeWidth={2} />
+              <Line
+                type="monotone"
+                dataKey="benefit"
+                stroke="#319795"
+                strokeWidth={3}
+                name="Change in Net Income"
+                dot={false}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        <ChartWatermark />
       </div>
     </div>
   );
