@@ -92,7 +92,9 @@ export default function Home() {
 /** Household impact tab */
 function HouseholdImpactTab() {
   const [ageHead, setAgeHead] = useState(35);
+  const [ageHeadRaw, setAgeHeadRaw] = useState('35');
   const [ageSpouse, setAgeSpouse] = useState<number | null>(null);
+  const [ageSpouseRaw, setAgeSpouseRaw] = useState('35');
   const [married, setMarried] = useState(false);
   const [dependentAges, setDependentAges] = useState<number[]>([]);
   const [expectingBaby, setExpectingBaby] = useState(false);
@@ -104,8 +106,12 @@ function HouseholdImpactTab() {
 
   const handleMarriedChange = (value: boolean) => {
     setMarried(value);
-    if (!value) setAgeSpouse(null);
-    else setAgeSpouse(35);
+    if (!value) {
+      setAgeSpouse(null);
+    } else {
+      setAgeSpouse(35);
+      setAgeSpouseRaw('35');
+    }
   };
 
   const handleDependentCountChange = (count: number) => {
@@ -168,8 +174,13 @@ function HouseholdImpactTab() {
             <label className="block text-sm font-medium text-gray-600 mb-1.5">Your age</label>
             <input
               type="number"
-              value={ageHead}
-              onChange={(e) => setAgeHead(Math.max(18, Math.min(100, parseInt(e.target.value) || 18)))}
+              value={ageHeadRaw}
+              onChange={(e) => setAgeHeadRaw(e.target.value)}
+              onBlur={() => {
+                const clamped = Math.max(18, Math.min(100, parseInt(ageHeadRaw) || 18));
+                setAgeHead(clamped);
+                setAgeHeadRaw(String(clamped));
+              }}
               min={18}
               max={100}
               className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
@@ -195,8 +206,13 @@ function HouseholdImpactTab() {
             {married && (
               <input
                 type="number"
-                value={ageSpouse ?? 35}
-                onChange={(e) => setAgeSpouse(Math.max(18, Math.min(100, parseInt(e.target.value) || 18)))}
+                value={ageSpouseRaw}
+                onChange={(e) => setAgeSpouseRaw(e.target.value)}
+                onBlur={() => {
+                  const clamped = Math.max(18, Math.min(100, parseInt(ageSpouseRaw) || 18));
+                  setAgeSpouse(clamped);
+                  setAgeSpouseRaw(String(clamped));
+                }}
                 min={18}
                 max={100}
                 placeholder="Spouse age"
