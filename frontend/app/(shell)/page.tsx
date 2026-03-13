@@ -181,8 +181,6 @@ function HouseholdImpactTab() {
                 setAgeHead(clamped);
                 setAgeHeadRaw(String(clamped));
               }}
-              min={18}
-              max={100}
               className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
             />
           </div>
@@ -213,8 +211,6 @@ function HouseholdImpactTab() {
                   setAgeSpouse(clamped);
                   setAgeSpouseRaw(String(clamped));
                 }}
-                min={18}
-                max={100}
                 placeholder="Spouse age"
                 aria-label="Spouse age"
                 className="w-full mt-2 px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
