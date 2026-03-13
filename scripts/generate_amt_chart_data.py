@@ -1,14 +1,14 @@
 """Generate AMT interaction data for the KYPA blog post chart.
 
-Calculates bracket savings (regular tax only) and actual savings (with AMT)
-for a married couple filing jointly with only employment income, standard
-deduction, in Texas, across a range of incomes in 2026.
+Calculates two lines for a married couple filing jointly with only
+employment income, standard deduction, in Texas, across incomes in 2026:
 
-Uses the full KYPA reform from reform.json (standard deduction increase,
-bracket rate changes, CTC/EITC changes).
+- "without AMT": (income_tax - AMT) savings — what you'd expect if AMT
+  didn't exist. Includes standard deduction, rate changes, CTC, EITC.
+- "with AMT": actual income_tax savings (the real impact)
 
-Uses vectorized multi-person simulation for speed (two Simulation calls
-total instead of one per income level).
+Uses the full KYPA reform from reform.json.
+Uses vectorized multi-person simulation for speed.
 
 Output: frontend/app/amt-chart/data.json (imported by the chart component)
 """
@@ -65,23 +65,27 @@ def main():
 
     print(f"Running baseline simulation ({len(INCOMES)} income levels)...")
     bl = Simulation(situation=situation)
-    bl_reg = bl.calculate("regular_tax_before_credits", 2026)
     bl_tax = bl.calculate("income_tax", 2026)
+    bl_amt = bl.calculate("alternative_minimum_tax", 2026)
 
     print("Running reform simulation...")
     rf = Simulation(situation=situation, reform=reform)
-    rf_reg = rf.calculate("regular_tax_before_credits", 2026)
     rf_tax = rf.calculate("income_tax", 2026)
+    rf_amt = rf.calculate("alternative_minimum_tax", 2026)
 
     results = []
     for i, inc in enumerate(INCOMES):
-        bracket_savings = round(float(bl_reg[i] - rf_reg[i]))
+        # "without AMT" = savings in (income_tax - AMT)
+        no_amt_savings = round(
+            float((bl_tax[i] - bl_amt[i]) - (rf_tax[i] - rf_amt[i]))
+        )
+        # "with AMT" = savings in income_tax (the real impact)
         actual_savings = round(float(bl_tax[i] - rf_tax[i]))
         results.append(
-            {"income": inc, "bracket": bracket_savings, "actual": actual_savings}
+            {"income": inc, "without_amt": no_amt_savings, "actual": actual_savings}
         )
         print(
-            f"${inc:>9,}: bracket={bracket_savings:>8,}  actual={actual_savings:>8,}"
+            f"${inc:>9,}: without_amt={no_amt_savings:>8,}  actual={actual_savings:>8,}"
         )
 
     OUTPUT_PATH.write_text(json.dumps(results, indent=2) + "\n")
