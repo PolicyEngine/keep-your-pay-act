@@ -17,6 +17,10 @@ import ChartWatermark from '@/components/ChartWatermark';
 import generatedData from './data.json';
 const data = generatedData as { income: number; without_amt: number; actual: number }[];
 
+// Note: This is a client component, so metadata must be exported from a
+// separate metadata file or handled in the parent layout. For SEO, the
+// page title and description are set via the heading and paragraph below.
+
 const TEAL = '#319795';
 const GRAY = '#718096';
 

@@ -9,34 +9,63 @@ const TOOL_NAME = 'keep-your-pay-act';
 
 const inter = Inter({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700', '800'],
+  weight: ['400', '500', '600', '700'],
   display: 'swap',
 });
 
 const SITE_URL = 'https://policyengine.org/us/keep-your-pay-act';
+const OG_IMAGE = 'https://policyengine.org/assets/logos/policyengine/og-logo.png';
 
 export const metadata: Metadata = {
-  title: 'Keep Your Pay Act Calculator',
+  title: {
+    default: 'Keep Your Pay Act Calculator | PolicyEngine',
+    template: '%s | PolicyEngine',
+  },
   description:
     'Calculate your personal and national tax impact under the Keep Your Pay Act. See how Senator Booker\'s proposed standard deduction increase, Child Tax Credit expansion, and EITC changes affect your household.',
+  keywords: [
+    'Keep Your Pay Act',
+    'tax calculator',
+    'Senator Booker',
+    'standard deduction',
+    'Child Tax Credit',
+    'CTC expansion',
+    'EITC',
+    'Earned Income Tax Credit',
+    'tax reform',
+    'PolicyEngine',
+    'tax impact',
+    'household tax impact',
+  ],
   metadataBase: new URL(SITE_URL),
   alternates: {
     canonical: SITE_URL,
   },
   openGraph: {
-    title: 'Keep Your Pay Act Calculator',
+    title: 'Keep Your Pay Act Calculator | PolicyEngine',
     description:
       'Calculate your personal and national tax impact under the Keep Your Pay Act. See how the proposed standard deduction increase, Child Tax Credit expansion, and EITC changes affect your household.',
     url: SITE_URL,
     siteName: 'PolicyEngine',
     type: 'website',
     locale: 'en_US',
+    images: [
+      {
+        url: OG_IMAGE,
+        width: 1200,
+        height: 630,
+        alt: 'PolicyEngine Keep Your Pay Act Calculator',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Keep Your Pay Act Calculator',
+    site: '@ThePolicyEngine',
+    creator: '@ThePolicyEngine',
+    title: 'Keep Your Pay Act Calculator | PolicyEngine',
     description:
       'Calculate your personal and national tax impact under the Keep Your Pay Act.',
+    images: [OG_IMAGE],
   },
   other: {
     'theme-color': '#2C7A7B',
@@ -47,6 +76,43 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+};
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'Keep Your Pay Act Calculator',
+  description:
+    "Calculate your personal and national tax impact under the Keep Your Pay Act. See how Senator Booker's proposed standard deduction increase, Child Tax Credit expansion, and EITC changes affect your household.",
+  url: SITE_URL,
+  applicationCategory: 'FinanceApplication',
+  operatingSystem: 'Any',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
+  provider: {
+    '@type': 'Organization',
+    name: 'PolicyEngine',
+    url: 'https://policyengine.org',
+    logo: 'https://policyengine.org/assets/logos/policyengine/og-logo.png',
+    sameAs: [
+      'https://twitter.com/ThePolicyEngine',
+      'https://www.facebook.com/PolicyEngine',
+      'https://www.linkedin.com/company/thepolicyengine',
+      'https://github.com/PolicyEngine',
+      'https://www.youtube.com/@policyengine',
+      'https://www.instagram.com/PolicyEngine/',
+    ],
   },
 };
 
@@ -58,6 +124,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.className}>
       <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
           strategy="afterInteractive"
