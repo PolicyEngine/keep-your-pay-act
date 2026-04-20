@@ -14,6 +14,9 @@ export default function ChartWatermark() {
       src={`${basePath}/policyengine-logo-teal.png`}
       alt=""
       aria-hidden="true"
+      loading="lazy"
+      width={80}
+      height={20}
       style={{
         display: 'block',
         marginLeft: 'auto',

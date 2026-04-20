@@ -51,13 +51,15 @@ export default function Home() {
 
       <div className="max-w-5xl mx-auto px-4 py-8">
         {/* Tabs */}
-        <div className="flex space-x-1 mb-4" role="tablist">
+        <div className="flex space-x-1 mb-4" role="tablist" aria-label="Policy analysis sections">
           {TAB_CONFIG.map((tab) => (
             <button
               key={tab.id}
+              id={`tab-${tab.id}`}
               role="tab"
               aria-selected={activeTab === tab.id}
               aria-controls={`tabpanel-${tab.id}`}
+              tabIndex={activeTab === tab.id ? 0 : -1}
               onClick={() => setActiveTab(tab.id)}
               className={`px-6 py-3 rounded-t-lg font-semibold transition-colors ${
                 activeTab === tab.id
@@ -74,6 +76,7 @@ export default function Home() {
         <div
           role="tabpanel"
           id={`tabpanel-${activeTab}`}
+          aria-labelledby={`tab-${activeTab}`}
           className="bg-white rounded-lg shadow-md p-6"
         >
           {activeTab === 'policy' ? (
