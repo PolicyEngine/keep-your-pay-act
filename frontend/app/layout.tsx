@@ -13,8 +13,8 @@ const inter = Inter({
   display: 'swap',
 });
 
-const SITE_URL = 'https://policyengine.org/us/keep-your-pay-act';
-const OG_IMAGE = 'https://policyengine.org/assets/logos/policyengine/og-logo.png';
+const SITE_URL = 'https://www.policyengine.org/us/keep-your-pay-act';
+const OG_IMAGE = 'https://www.policyengine.org/assets/logos/policyengine/og-logo.png';
 
 export const metadata: Metadata = {
   title: {
@@ -103,8 +103,8 @@ const jsonLd = {
   provider: {
     '@type': 'Organization',
     name: 'PolicyEngine',
-    url: 'https://policyengine.org',
-    logo: 'https://policyengine.org/assets/logos/policyengine/og-logo.png',
+    url: 'https://www.policyengine.org',
+    logo: 'https://www.policyengine.org/assets/logos/policyengine/og-logo.png',
     sameAs: [
       'https://twitter.com/ThePolicyEngine',
       'https://www.facebook.com/PolicyEngine',

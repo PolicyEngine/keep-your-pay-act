@@ -1,3 +1,8 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 // Use empty string for local dev (NEXT_PUBLIC_BASE_PATH=""), otherwise default to production path
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH !== undefined
   ? process.env.NEXT_PUBLIC_BASE_PATH
@@ -10,6 +15,9 @@ const nextConfig = {
   compress: true,
   images: {
     formats: ['image/avif', 'image/webp'],
+  },
+  turbopack: {
+    root: path.join(__dirname, ".."),
   },
   async headers() {
     return [
