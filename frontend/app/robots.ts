@@ -9,7 +9,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/api/', '/_next/'],
       },
     ],
-    sitemap: 'https://policyengine.org/us/keep-your-pay-act/sitemap.xml',
-    host: 'https://policyengine.org',
+    sitemap: 'https://www.policyengine.org/us/keep-your-pay-act/sitemap.xml',
+    host: 'https://www.policyengine.org',
   };
 }
