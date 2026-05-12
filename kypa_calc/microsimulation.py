@@ -1,21 +1,19 @@
-"""Aggregate impact calculations using enhanced CPS microsimulation.
+"""Aggregate impact calculations using policyengine.py managed microsimulation.
 
-Uses federal income_tax to isolate the Keep Your Pay Act's federal impact.
-
-Uses MicroSeries throughout where possible. MicroSeries.sum() is
-automatically weighted, and boolean masks preserve entity alignment.
-Only drops to numpy for operations MicroSeries can't do (groupby-like
-decile loops, child poverty age filtering).
+Uses federal income_tax for the fiscal score and household_net_income for
+distributional analysis, matching the app-v2 style used by the other proposal
+apps. MicroSeries .sum() and .mean() are weighted by construction.
 """
 
-import numpy as np
-from policyengine_us import Microsimulation
+from math import inf
+from typing import Any
+
+import policyengine as pe
 
 from .reforms import create_reform
 
 
-# API v2 intra-decile bounds and labels
-_INTRA_BOUNDS = [-np.inf, -0.05, -1e-3, 1e-3, 0.05, np.inf]
+_INTRA_BOUNDS = [-inf, -0.05, -1e-3, 1e-3, 0.05, inf]
 _INTRA_LABELS = [
     "Lose more than 5%",
     "Lose less than 5%",
@@ -25,70 +23,88 @@ _INTRA_LABELS = [
 ]
 
 
-def _poverty_metrics(baseline_rate, reform_rate):
-    """Return rate change and percent change for a poverty metric."""
-    rate_change = reform_rate - baseline_rate
-    percent_change = (
-        rate_change / baseline_rate * 100
-        if baseline_rate > 0
-        else 0.0
+def _new_us_microsimulation(reform=None, dataset: str | None = None):
+    kwargs = {"reform": reform}
+    if dataset is not None:
+        kwargs["dataset"] = dataset
+    return pe.us.managed_microsimulation(**kwargs)
+
+
+def _calc(sim: Any, variable: str, year: int, map_to: str | None = None):
+    kwargs = {"period": year}
+    if map_to is not None:
+        kwargs["map_to"] = map_to
+    return sim.calc(variable, **kwargs)
+
+
+def _mean_or_zero(series) -> float:
+    count = float((series * 0 + 1).sum())
+    return float(series.mean()) if count > 0 else 0.0
+
+
+def _share_pct(series, mask=None) -> float:
+    if mask is not None:
+        series = series[mask]
+    return _mean_or_zero(series) * 100
+
+
+def _relative_change_mask(change, baseline, lower: float, upper: float):
+    positive_baseline = baseline > 1
+    relative_change = change / baseline
+    capped_relative_change = change
+    return (
+        positive_baseline
+        & (relative_change > lower)
+        & (relative_change <= upper)
+    ) | (
+        (~positive_baseline)
+        & (capped_relative_change > lower)
+        & (capped_relative_change <= upper)
     )
+
+
+def _poverty_metrics(baseline_rate, reform_rate):
+    rate_change = reform_rate - baseline_rate
+    percent_change = rate_change / baseline_rate * 100 if baseline_rate > 0 else 0.0
     return rate_change, percent_change
 
 
 def calculate_aggregate_impact(year: int = 2026) -> dict:
     reform = create_reform(year=year)
 
-    sim_baseline = Microsimulation()
-    sim_reform = Microsimulation(reform=reform)
+    sim_baseline = _new_us_microsimulation()
+    sim_reform = _new_us_microsimulation(reform=reform)
 
     # ===== FISCAL IMPACT =====
-    tax_baseline = sim_baseline.calculate(
-        "income_tax", period=year, map_to="household"
-    )
-    tax_reform = sim_reform.calculate(
-        "income_tax", period=year, map_to="household"
-    )
-    income_change = tax_baseline - tax_reform
-    tax_revenue_impact = float(-income_change.sum())
+    tax_baseline = _calc(sim_baseline, "income_tax", year, map_to="household")
+    tax_reform = _calc(sim_reform, "income_tax", year, map_to="household")
+    tax_revenue_impact = float((tax_reform - tax_baseline).sum())
 
-    # Total households: (x * 0 + 1).sum() = sum(weights)
+    # ===== DISTRIBUTIONAL IMPACT =====
+    baseline_net_income = _calc(
+        sim_baseline, "household_net_income", year, map_to="household"
+    )
+    reform_net_income = _calc(
+        sim_reform, "household_net_income", year, map_to="household"
+    )
+    income_change = reform_net_income - baseline_net_income
+
     total_households = float((income_change * 0 + 1).sum())
 
-    # ===== WINNERS / LOSERS =====
     winners = float((income_change > 1).sum())
     losers = float((income_change < -1).sum())
     beneficiaries = float((income_change > 0).sum())
 
-    affected = abs(income_change) > 1
-    affected_count = float(affected.sum())
-
-    # Use numpy for correct weighted average (MicroSeries sum/sum gives wrong result)
-    household_weight_early = sim_reform.calculate(
-        "household_weight", period=year
-    )
-    affected_mask = np.array(affected).astype(bool)
-    change_arr_early = np.array(income_change)
-    weight_arr_early = np.array(household_weight_early)
     avg_benefit = (
-        float(np.average(
-            change_arr_early[affected_mask],
-            weights=weight_arr_early[affected_mask],
-        ))
-        if affected_count > 0
+        float(income_change[income_change > 0].mean())
+        if beneficiaries > 0
         else 0.0
     )
 
     winners_rate = winners / total_households * 100
     losers_rate = losers / total_households * 100
 
-    # ===== INCOME DECILE ANALYSIS =====
-    decile = sim_baseline.calculate(
-        "household_income_decile", period=year, map_to="household"
-    )
-    baseline_net_income = sim_baseline.calculate(
-        "household_net_income", period=year, map_to="household"
-    )
+    decile = _calc(sim_baseline, "household_income_decile", year, map_to="household")
 
     decile_average = {}
     decile_relative = {}
@@ -100,105 +116,64 @@ def calculate_aggregate_impact(year: int = 2026) -> dict:
             decile_average[str(d)] = d_change_sum / d_count
             d_baseline_sum = float(baseline_net_income[dmask].sum())
             decile_relative[str(d)] = (
-                d_change_sum / d_baseline_sum
-                if d_baseline_sum != 0
-                else 0.0
+                d_change_sum / d_baseline_sum if d_baseline_sum != 0 else 0.0
             )
         else:
             decile_average[str(d)] = 0.0
             decile_relative[str(d)] = 0.0
 
-    # Intra-decile requires person-weighted proportions — need numpy
-    household_weight = sim_reform.calculate(
-        "household_weight", period=year
+    people_per_hh = _calc(
+        sim_baseline, "household_count_people", year, map_to="household"
     )
-    people_per_hh = sim_baseline.calculate(
-        "household_count_people", period=year, map_to="household"
-    )
-    capped_baseline = np.maximum(np.array(baseline_net_income), 1)
-    rel_change_arr = np.array(income_change) / capped_baseline
-
-    decile_arr = np.array(decile)
-    weight_arr = np.array(household_weight)
-    people_weighted = np.array(people_per_hh) * weight_arr
-
     intra_decile_deciles = {label: [] for label in _INTRA_LABELS}
     for d in range(1, 11):
-        dmask = decile_arr == d
-        d_people = people_weighted[dmask]
-        d_total_people = d_people.sum()
-        d_rel = rel_change_arr[dmask]
+        dmask = decile == d
+        d_total_people = float(people_per_hh[dmask].sum())
 
         for lower, upper, label in zip(
             _INTRA_BOUNDS[:-1], _INTRA_BOUNDS[1:], _INTRA_LABELS
         ):
-            in_group = (d_rel > lower) & (d_rel <= upper)
+            in_group = dmask & _relative_change_mask(
+                income_change, baseline_net_income, lower, upper
+            )
             proportion = (
-                float(d_people[in_group].sum() / d_total_people)
+                float(people_per_hh[in_group].sum() / d_total_people)
                 if d_total_people > 0
                 else 0.0
             )
             intra_decile_deciles[label].append(proportion)
 
     intra_decile_all = {
-        label: sum(intra_decile_deciles[label]) / 10
-        for label in _INTRA_LABELS
+        label: sum(intra_decile_deciles[label]) / 10 for label in _INTRA_LABELS
     }
 
     # ===== POVERTY IMPACT =====
-    pov_bl = sim_baseline.calculate(
-        "in_poverty", period=year, map_to="person"
-    )
-    pov_rf = sim_reform.calculate(
-        "in_poverty", period=year, map_to="person"
-    )
-    poverty_baseline_rate = float(pov_bl.mean() * 100)
-    poverty_reform_rate = float(pov_rf.mean() * 100)
+    pov_bl = _calc(sim_baseline, "person_in_poverty", year, map_to="person")
+    pov_rf = _calc(sim_reform, "person_in_poverty", year, map_to="person")
+    is_child = _calc(sim_baseline, "age", year, map_to="person") < 18
+
+    poverty_baseline_rate = _share_pct(pov_bl)
+    poverty_reform_rate = _share_pct(pov_rf)
     poverty_rate_change, poverty_percent_change = _poverty_metrics(
         poverty_baseline_rate, poverty_reform_rate
     )
 
-    # Child/deep poverty needs age filtering — numpy required
-    age_arr = np.array(sim_baseline.calculate("age", period=year))
-    is_child = age_arr < 18
-    pw_arr = np.array(sim_baseline.calculate("person_weight", period=year))
-    child_w = pw_arr[is_child]
-    total_child_w = child_w.sum()
-
-    pov_bl_arr = np.array(pov_bl).astype(bool)
-    pov_rf_arr = np.array(pov_rf).astype(bool)
-
-    def _child_rate(arr):
-        return float(
-            (arr[is_child] * child_w).sum() / total_child_w * 100
-        ) if total_child_w > 0 else 0.0
-
-    child_poverty_baseline_rate = _child_rate(pov_bl_arr)
-    child_poverty_reform_rate = _child_rate(pov_rf_arr)
-    child_poverty_rate_change, child_poverty_percent_change = (
-        _poverty_metrics(
-            child_poverty_baseline_rate, child_poverty_reform_rate
-        )
+    child_poverty_baseline_rate = _share_pct(pov_bl, is_child)
+    child_poverty_reform_rate = _share_pct(pov_rf, is_child)
+    child_poverty_rate_change, child_poverty_percent_change = _poverty_metrics(
+        child_poverty_baseline_rate, child_poverty_reform_rate
     )
 
-    deep_bl = sim_baseline.calculate(
-        "in_deep_poverty", period=year, map_to="person"
-    )
-    deep_rf = sim_reform.calculate(
-        "in_deep_poverty", period=year, map_to="person"
-    )
-    deep_poverty_baseline_rate = float(deep_bl.mean() * 100)
-    deep_poverty_reform_rate = float(deep_rf.mean() * 100)
-    deep_poverty_rate_change, deep_poverty_percent_change = (
-        _poverty_metrics(
-            deep_poverty_baseline_rate, deep_poverty_reform_rate
-        )
+    deep_bl = _calc(sim_baseline, "in_deep_poverty", year, map_to="person")
+    deep_rf = _calc(sim_reform, "in_deep_poverty", year, map_to="person")
+    deep_poverty_baseline_rate = _share_pct(deep_bl)
+    deep_poverty_reform_rate = _share_pct(deep_rf)
+    deep_poverty_rate_change, deep_poverty_percent_change = _poverty_metrics(
+        deep_poverty_baseline_rate, deep_poverty_reform_rate
     )
 
-    deep_bl_arr = np.array(deep_bl).astype(bool)
-    deep_rf_arr = np.array(deep_rf).astype(bool)
-    deep_child_poverty_baseline_rate = _child_rate(deep_bl_arr)
-    deep_child_poverty_reform_rate = _child_rate(deep_rf_arr)
+    deep_child_poverty_baseline_rate = _share_pct(deep_bl, is_child)
+    deep_child_poverty_reform_rate = _share_pct(deep_rf, is_child)
     deep_child_poverty_rate_change, deep_child_poverty_percent_change = (
         _poverty_metrics(
             deep_child_poverty_baseline_rate,
@@ -207,12 +182,8 @@ def calculate_aggregate_impact(year: int = 2026) -> dict:
     )
 
     # ===== INCOME BRACKET BREAKDOWN =====
-    agi = sim_reform.calculate(
-        "adjusted_gross_income", period=year, map_to="household"
-    )
-    agi_arr = np.array(agi)
-    change_arr = np.array(income_change)
-    affected_mask = np.abs(change_arr) > 1
+    agi = _calc(sim_reform, "adjusted_gross_income", year, map_to="household")
+    affected = (income_change > 1) | (income_change < -1)
 
     income_brackets = [
         (0, 50_000, "Under $50k"),
@@ -226,34 +197,29 @@ def calculate_aggregate_impact(year: int = 2026) -> dict:
 
     by_income_bracket = []
     for min_inc, max_inc, label in income_brackets:
-        mask = (
-            (agi_arr >= min_inc)
-            & (agi_arr < max_inc)
-            & affected_mask
-        )
-        bracket_affected = float(weight_arr[mask].sum())
+        mask = (agi >= min_inc) & (agi < max_inc) & affected
+        bracket_affected = float(mask.sum())
         if bracket_affected > 0:
-            bracket_cost = float(
-                (change_arr[mask] * weight_arr[mask]).sum()
-            )
-            bracket_avg = float(
-                np.average(change_arr[mask], weights=weight_arr[mask])
-            )
+            bracket_cost = float(income_change[mask].sum())
+            bracket_avg = float(income_change[mask].mean())
         else:
             bracket_cost = 0.0
             bracket_avg = 0.0
-        by_income_bracket.append({
-            "bracket": label,
-            "beneficiaries": bracket_affected,
-            "total_cost": bracket_cost,
-            "avg_benefit": bracket_avg,
-        })
+        by_income_bracket.append(
+            {
+                "bracket": label,
+                "beneficiaries": bracket_affected,
+                "total_cost": bracket_cost,
+                "avg_benefit": bracket_avg,
+            }
+        )
 
     return {
         "budget": {
             "budgetary_impact": tax_revenue_impact,
             "tax_revenue_impact": tax_revenue_impact,
             "benefit_spending_impact": 0.0,
+            "baseline_net_income": float(baseline_net_income.sum()),
             "households": total_households,
         },
         "decile": {
