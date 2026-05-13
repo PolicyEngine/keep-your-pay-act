@@ -12,8 +12,8 @@ def test_aggregate_microsimulation_uses_policyengine_py(monkeypatch) -> None:
 
     class TinyMicrosimulation:
         def calc(self, variable: str, **kwargs):
-            assert variable == "household_count_people"
-            assert kwargs == {"period": 2024, "map_to": "household"}
+            assert variable == "household_net_income"
+            assert kwargs == {"period": 2024, "map_to": "person"}
             return MicroSeries([1.0, 3.0], weights=[2.0, 4.0])
 
     def fake_managed_microsimulation(**kwargs):
@@ -29,9 +29,9 @@ def test_aggregate_microsimulation_uses_policyengine_py(monkeypatch) -> None:
     sim = microsimulation._new_us_microsimulation()
     result = microsimulation._calc(
         sim,
-        "household_count_people",
+        "household_net_income",
         2024,
-        map_to="household",
+        map_to="person",
     )
 
     assert calls == [{"reform": None}]
@@ -51,6 +51,7 @@ def test_aggregate_microsimulation_avoids_manual_weight_variables() -> None:
         "person" + "_weight",
         "tax_unit" + "_weight",
         "spm_unit" + "_weight",
+        "household_count_" + "people",
     ]
 
     for name in forbidden_names:
