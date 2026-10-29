@@ -2,7 +2,7 @@
 
 Interactive calculator for estimating the impact of Senator Cory Booker's Keep Your Pay Act.
 
-**Live site:** https://keep-your-pay-act.vercel.app
+**Live site:** https://policyengine.org/us/keep-your-pay-act
 
 ## Structure
 
