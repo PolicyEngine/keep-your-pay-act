@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import ImpactAnalysis from '@/components/ImpactAnalysis';
 import AggregateImpact from '@/components/AggregateImpact';
 import PolicyOverview from '@/components/PolicyOverview';
+import { resetFailedHouseholdImpact } from '@/hooks/useHouseholdImpact';
 import type { HouseholdRequest } from '@/lib/types';
 
 const US_STATES = [
@@ -94,6 +96,7 @@ export default function Home() {
 
 /** Household impact tab */
 function HouseholdImpactTab() {
+  const queryClient = useQueryClient();
   const [ageHead, setAgeHead] = useState(35);
   const [ageHeadRaw, setAgeHeadRaw] = useState('35');
   const [ageSpouse, setAgeSpouse] = useState<number | null>(null);
@@ -144,7 +147,10 @@ function HouseholdImpactTab() {
   });
 
   const handleCalculate = () => {
-    setSubmittedRequest(buildRequest());
+    const request = buildRequest();
+    // After a failure, the same household would otherwise keep showing it.
+    void resetFailedHouseholdImpact(queryClient, request);
+    setSubmittedRequest(request);
     setTriggered(true);
   };
 
