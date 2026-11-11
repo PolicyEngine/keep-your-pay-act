@@ -15,11 +15,14 @@ export function resetFailedHouseholdImpact(
   queryClient: QueryClient,
   request: HouseholdRequest
 ): Promise<void> {
-  return queryClient.resetQueries({
-    queryKey: householdImpactQueryKey(request),
-    exact: true,
-    predicate: (query) => query.state.status === "error",
-  });
+  const filters = { queryKey: householdImpactQueryKey(request), exact: true };
+  // Check the status first: resetQueries applies its filters again when it
+  // refetches, and by then the reset query no longer counts as failed.
+  if (queryClient.getQueryCache().find(filters)?.state.status !== "error") {
+    return Promise.resolve();
+  }
+  // Resets the query and, while the page shows it, fetches it again.
+  return queryClient.resetQueries(filters);
 }
 
 export function useHouseholdImpact(
