@@ -1,5 +1,5 @@
-import { QueryClient } from "@tanstack/react-query";
-import { afterEach, describe, expect, it } from "vitest";
+import { QueryClient, QueryObserver } from "@tanstack/react-query";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { resetFailedHouseholdImpact } from "@/hooks/useHouseholdImpact";
 import type { HouseholdRequest } from "@/lib/types";
@@ -37,6 +37,32 @@ describe("resetFailedHouseholdImpact", () => {
     await resetFailedHouseholdImpact(queryClient, { ...householdRequest });
 
     expect(queryClient.getQueryState(queryKey)?.status).toBe("pending");
+  });
+
+  it("runs a failed calculation again while the page shows it", async () => {
+    let attempts = 0;
+    // The page's query, kept active as ImpactAnalysis keeps it.
+    const observer = new QueryObserver(queryClient, {
+      queryKey,
+      queryFn: async () => {
+        attempts += 1;
+        if (attempts === 1) {
+          throw new Error("The calculation failed.");
+        }
+        return { income_range: [] };
+      },
+      retry: false,
+    });
+    const unsubscribe = observer.subscribe(() => undefined);
+    await vi.waitFor(() =>
+      expect(queryClient.getQueryState(queryKey)?.status).toBe("error"),
+    );
+
+    await resetFailedHouseholdImpact(queryClient, { ...householdRequest });
+
+    expect(attempts).toBe(2);
+    expect(queryClient.getQueryState(queryKey)?.status).toBe("success");
+    unsubscribe();
   });
 
   it("keeps a calculation that succeeded", async () => {
