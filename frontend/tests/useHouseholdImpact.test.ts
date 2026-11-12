@@ -208,6 +208,8 @@ describe("fetchHouseholdImpact", () => {
 
 describe("householdImpactQueryOptions", () => {
   it("never calculates a refused household again on its own", async () => {
+    // A mounted client follows focus and network events, as the page's does.
+    queryClient.mount();
     const calculate = vi
       .spyOn(api, "calculateHouseholdImpact")
       .mockRejectedValue(rateLimitRefusal());
@@ -237,6 +239,37 @@ describe("householdImpactQueryOptions", () => {
     unsubscribe();
     unsubscribeSecond();
     focusManager.setFocused(undefined);
+    queryClient.unmount();
+  });
+
+  it("never calculates an answered household again on its own", async () => {
+    queryClient.mount();
+    const calculate = vi
+      .spyOn(api, "calculateHouseholdImpact")
+      .mockResolvedValue(impactAnswer(350));
+    const observer = new QueryObserver(
+      queryClient,
+      householdImpactQueryOptions(householdRequest, true),
+    );
+    const unsubscribe = observer.subscribe(() => undefined);
+    await vi.waitFor(() =>
+      expect(queryClient.getQueryState(queryKey)?.status).toBe("success"),
+    );
+
+    focusManager.setFocused(false);
+    focusManager.setFocused(true);
+    const secondObserver = new QueryObserver(
+      queryClient,
+      householdImpactQueryOptions(householdRequest, true),
+    );
+    const unsubscribeSecond = secondObserver.subscribe(() => undefined);
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    expect(calculate).toHaveBeenCalledTimes(1);
+    unsubscribe();
+    unsubscribeSecond();
+    focusManager.setFocused(undefined);
+    queryClient.unmount();
   });
 
   it("keeps answers for the page's lifetime", async () => {
