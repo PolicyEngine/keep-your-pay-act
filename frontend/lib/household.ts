@@ -1,8 +1,9 @@
 /**
- * Build a PolicyEngine household situation for the PE API.
+ * Build a PolicyEngine household situation for a household calculation.
  *
- * Mirrors kypa_calc/household.py but in TypeScript so we can call
- * the PE API directly from the frontend (no backend needed).
+ * Mirrors kypa_calc/household.py but in TypeScript, so the page can send
+ * households to www.policyengine.org's dashboard API without a backend of
+ * its own.
  */
 
 import type { HouseholdRequest } from "./types";
@@ -92,7 +93,7 @@ export function buildHouseholdSituation(
 }
 
 /**
- * Build the KYPA reform policy dict for the PE API.
+ * Build the KYPA reform's parameter changes for a household calculation.
  *
  * Single source of truth: reform.json at repo root.
  */
