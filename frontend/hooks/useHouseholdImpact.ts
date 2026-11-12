@@ -246,5 +246,12 @@ export function useHouseholdImpact(
       rememberShownHouseholdRequest(queryClient, null);
     }
   }, [queryClient, enabled, request, shownData, shownError]);
+  // When the results area leaves the page (for example, the reader opens
+  // another tab, which resets the household tab), its answer is no longer
+  // on screen, so a later refusal must not bring it back.
+  useEffect(
+    () => () => rememberShownHouseholdRequest(queryClient, null),
+    [queryClient]
+  );
   return householdImpactToShow(queryClient, request, query);
 }
